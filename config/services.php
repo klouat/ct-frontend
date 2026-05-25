@@ -36,7 +36,7 @@ return [
     ],
 
     'svs' => [
-        'base_url' => env('SVS_API_URL', 'http://127.0.0.1:8000'),
+        'base_url' => env('SVS_API_URL', 'https://ct.stagnant.my.id'),
     ],
 
 ];

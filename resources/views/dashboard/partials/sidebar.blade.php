@@ -5,6 +5,7 @@
         ['key' => 'home', 'label' => 'Dashboard', 'icon' => 'layout-grid', 'href' => '/home'],
         ['key' => 'scan', 'label' => 'Scanning', 'icon' => 'scan', 'href' => '/scan'],
         ['key' => 'invoice', 'label' => 'Input Invoice', 'icon' => 'file-text', 'href' => '/invoice'],
+        ['key' => 'invoice-barcodes', 'label' => 'Print Barcodes', 'icon' => 'barcode', 'href' => '/invoice-barcodes'],
         ['key' => 'history', 'label' => 'History', 'icon' => 'history', 'href' => '/history'],
     ];
 @endphp

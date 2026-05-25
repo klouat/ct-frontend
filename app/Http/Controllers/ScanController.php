@@ -7,19 +7,35 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Http;
 
-class InvoiceController extends Controller
+class ScanController extends Controller
 {
-    public function store(Request $request): JsonResponse
+    public function scan(Request $request): JsonResponse
     {
         $validated = $request->validate([
-            'invoice_id' => ['required', 'string', 'max:100'],
-            'vendor_name' => ['required', 'string', 'max:100'],
-            'product_name' => ['required', 'string', 'max:150'],
-            'product_id' => ['required', 'string', 'max:100'],
-            'box_count' => ['required', 'integer', 'min:1'],
-            'arrival_date' => ['nullable', 'date'],
+            'qr_text' => ['required', 'string'],
         ]);
 
+        return $this->forwardRequest(
+            $request,
+            '/api/scan',
+            [
+                'qr_text' => $validated['qr_text'],
+            ]
+        );
+    }
+
+    public function markPending(Request $request, int $invoiceId): JsonResponse
+    {
+        return $this->forwardRequest($request, '/api/scan/invoices/'.$invoiceId.'/pending');
+    }
+
+    public function complete(Request $request, int $invoiceId): JsonResponse
+    {
+        return $this->forwardRequest($request, '/api/scan/invoices/'.$invoiceId.'/complete');
+    }
+
+    private function forwardRequest(Request $request, string $path, array $payload = []): JsonResponse
+    {
         $auth = $request->session()->get('svs_auth');
         $token = data_get($auth, 'access_token');
 
@@ -29,22 +45,12 @@ class InvoiceController extends Controller
             ], 401);
         }
 
-        $payload = [
-            'invoice_code' => $validated['invoice_id'],
-            'po_number' => $validated['invoice_id'],
-            'vendor_name' => $validated['vendor_name'],
-            'product_name' => $validated['product_name'],
-            'product_id' => $validated['product_id'],
-            'target_box_count' => $validated['box_count'],
-            'estimated_arrival_date' => $validated['arrival_date'] ?? null,
-        ];
-
         try {
             $response = Http::acceptJson()
                 ->withoutVerifying()
                 ->timeout(20)
                 ->withToken($token)
-                ->post($this->apiUrl('/api/invoices'), $payload);
+                ->post($this->apiUrl($path), $payload);
         } catch (ConnectionException) {
             return response()->json([
                 'message' => 'Could not reach the SVS API at port 8000.',
@@ -57,16 +63,10 @@ class InvoiceController extends Controller
             $request->session()->forget('svs_auth');
         }
 
-        if (! $response->successful()) {
-            return response()->json([
-                'message' => $this->extractMessage($body, 'Failed to create invoice'),
-                'errors' => $body['errors'] ?? null,
-            ], $response->status());
-        }
-
         return response()->json([
-            'message' => $this->extractMessage($body, 'Invoice created successfully'),
+            'message' => $this->extractMessage($body, $response->successful() ? 'Request successful' : 'Request failed'),
             'data' => data_get($body, 'data'),
+            'errors' => $body['errors'] ?? null,
         ], $response->status());
     }
 

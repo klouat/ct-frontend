@@ -7,6 +7,7 @@
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
+    <script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.6/dist/JsBarcode.all.min.js"></script>
 </head>
 <body class="bg-[#f4faff] flex min-h-screen font-sans text-gray-800">
 
@@ -29,62 +30,44 @@
                 
                 <form id="invoiceForm" class="space-y-4 bg-white p-8 rounded-3xl shadow-sm border border-blue-50">
                     <div>
-                        <label class="block text-sm font-semibold text-gray-600 mb-2">Nomor PO / Surat Jalan</label>
-                        <input type="text" id="po_number" required placeholder="Contoh: PO-2023-001" 
+                        <label class="block text-sm font-semibold text-gray-600 mb-2">Pilih Vendor</label>
+                        <div class="vendor-select-slot w-full" data-selected-value=""></div>
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-semibold text-gray-600 mb-2">Product Name</label>
+                        <input type="text" id="product_name" required placeholder="Contoh: Printer"
+                               class="w-full p-4 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-semibold text-gray-600 mb-2">Invoice ID</label>
+                        <input type="text" id="invoice_id" required placeholder="Contoh: inv-0123"
+                               class="w-full p-4 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-semibold text-gray-600 mb-2">Product ID</label>
+                        <input type="text" id="product_id" required placeholder="Contoh: pd-0123"
                                class="w-full p-4 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500">
                     </div>
 
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div>
-                            <label class="block text-sm font-semibold text-gray-600 mb-2">Target Jumlah Box</label>
-                            <input type="number" id="box_count" required placeholder="0" 
+                            <label class="block text-sm font-semibold text-gray-600 mb-2">Jumlah Box</label>
+                            <input type="number" id="box_count" required min="1" placeholder="0"
                                    class="w-full p-4 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500">
                         </div>
                         <div>
                             <label class="block text-sm font-semibold text-gray-600 mb-2">Estimasi Kedatangan</label>
-                            <input type="date" id="arrival_date" required 
+                            <input type="date" id="arrival_date" required
                                    class="w-full p-4 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500">
                         </div>
                     </div>
 
-                    <div class="border-t border-gray-100 pt-4">
-                        <div class="flex items-center justify-between gap-4">
-                            <div>
-                                <h3 class="text-lg font-semibold text-[#0033ab]">Manual Data Entry</h3>
-                                <p class="text-sm text-gray-500">Masukkan data box dan item secara manual seperti referensi form.</p>
-                            </div>
-                            <button type="button" id="addManualRow" class="shrink-0 rounded-xl border border-blue-200 px-4 py-2 text-sm font-semibold text-[#0033ab] transition hover:bg-blue-50">
-                                + Add Row
-                            </button>
-                        </div>
-
-                        <div id="manualRows" class="mt-4 space-y-3">
-                            <div class="manual-entry-row grid grid-cols-1 gap-3 rounded-2xl border border-gray-100 bg-[#f8fbff] p-4 md:grid-cols-2">
-                                <input type="text" name="box_id[]" placeholder="BOX ID" class="w-full rounded-xl border border-gray-200 p-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
-                                <input type="text" name="item_name[]" placeholder="Item Name" class="w-full rounded-xl border border-gray-200 p-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
-                                <input type="number" name="quantity[]" placeholder="Quantity" min="0" class="w-full rounded-xl border border-gray-200 p-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
-                                <div class="flex gap-3">
-                                    <div class="vendor-select-slot w-full" data-selected-value=""></div>
-                                    <button type="button" class="remove-row hidden rounded-xl border border-red-200 px-4 text-sm font-semibold text-red-500 transition hover:bg-red-50">
-                                        Remove
-                                    </button>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- UPLOAD AREA -->
-                    <div class="border-2 border-dashed border-blue-200 bg-blue-50 rounded-2xl p-8 text-center cursor-pointer hover:bg-blue-100 transition" 
-                         onclick="document.getElementById('fileInput').click()">
-                        <input type="file" id="fileInput" class="hidden" accept=".csv, .xlsx">
-                        <i data-lucide="file-up" class="w-12 h-12 mx-auto text-[#0033ab] mb-2"></i>
-                        <p class="text-blue-800 font-bold">Upload Manifest File (Excel/CSV)</p>
-                        <p class="text-xs text-gray-400">Max file size 5MB</p>
-                    </div>
-
                     <div class="bg-blue-50 border border-blue-100 p-4 rounded-xl flex gap-3">
                         <i data-lucide="info" class="text-blue-600 shrink-0"></i>
-                        <p class="text-xs text-blue-900">Pastikan nomor PO sesuai dengan dokumen fisik untuk menghindari penolakan saat unloading di dermaga.</p>
+                        <p class="text-xs text-blue-900">Pastikan Invoice ID sesuai dengan yang dikirim vendor untuk menghindari penolakan saat unloading di dermaga.</p>
                     </div>
 
                     <p id="formError" class="hidden rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm font-medium text-red-600"></p>
@@ -105,27 +88,55 @@
                     <p class="text-gray-500 max-w-sm mx-auto mt-2">Data invoice telah berhasil disimpan dalam antrean sinkronisasi.</p>
                 </div>
 
-                <div class="bg-white rounded-3xl shadow-sm border border-blue-50 overflow-hidden text-left">
-                    <div class="bg-blue-50/50 p-6 border-b border-blue-100">
-                        <h3 class="font-bold text-[#0033ab] uppercase tracking-wider">Ringkasan Invoice</h3>
+                <div class="bg-white rounded-3xl shadow-sm border border-blue-100 overflow-hidden text-left">
+                    <div class="bg-[#f4f1ff] p-6 border-b border-blue-100">
+                        <h3 class="font-bold text-[#001a4d] uppercase tracking-wider">Ringkasan Invoice</h3>
                     </div>
-                    <div class="divide-y divide-gray-100">
-                        <div class="p-4 flex justify-between">
-                            <span class="text-gray-500">Manual Entry</span>
-                            <span id="res-manual-count" class="font-bold">1 baris</span>
+                    <div class="border-b border-blue-100 bg-[#fcfdff] p-6">
+                        <div class="rounded-2xl border border-dashed border-blue-200 bg-white p-4 text-center">
+                            <svg id="barcodePreview" class="mx-auto"></svg>
+                            <p id="barcodeText" class="mt-3 break-all text-xs font-semibold text-gray-500">Barcode will appear here</p>
                         </div>
-                        <div class="p-4 flex justify-between">
-                            <span class="text-gray-500">Nomor PO</span>
-                            <span id="res-po" class="font-bold">PO-2023-001</span>
+                    </div>
+                    <div class="divide-y divide-blue-100">
+                        <div class="p-4 flex justify-between gap-4">
+                            <span class="text-gray-500">Vendor</span>
+                            <span id="res-vendor" class="font-medium text-gray-900 text-right">Vendor A</span>
                         </div>
-                        <div class="p-4 flex justify-between">
+                        <div class="p-4 flex justify-between gap-4">
+                            <span class="text-gray-500">Product Name</span>
+                            <span id="res-product-name" class="font-medium text-gray-900 text-right">Printer</span>
+                        </div>
+                        <div class="p-4 flex justify-between gap-4">
+                            <span class="text-gray-500">Product ID</span>
+                            <span id="res-product-id" class="font-medium text-gray-900 text-right">pd-0123</span>
+                        </div>
+                        <div class="p-4 flex justify-between gap-4">
+                            <span class="text-gray-500">Invoice ID</span>
+                            <span id="res-invoice" class="font-medium text-gray-900 text-right">inv-0123</span>
+                        </div>
+                        <div class="p-4 flex justify-between gap-4">
+                            <span class="text-gray-500">Total Box</span>
+                            <span id="res-box-count" class="font-medium text-gray-900 text-right">50</span>
+                        </div>
+                        <div class="p-4 flex justify-between gap-4">
+                            <span class="text-gray-500">Estimasi Kedatangan</span>
+                            <span id="res-arrival-date" class="font-medium text-[#001a4d] text-right">01/06/2026</span>
+                        </div>
+                        <div class="p-4 flex justify-between gap-4 items-center">
                             <span class="text-gray-500">Status</span>
-                            <span class="bg-green-100 text-green-700 px-3 py-1 rounded-full text-xs font-bold">TERVERIFIKASI</span>
+                            <span id="res-status-badge" class="inline-flex items-center gap-2 rounded-full border border-orange-300 bg-orange-50 px-4 py-1 text-xs font-bold text-orange-500">
+                                <i id="res-status-icon" data-lucide="alert-triangle" class="w-4 h-4"></i>
+                                <span id="res-status-text">Pending</span>
+                            </span>
                         </div>
                     </div>
                 </div>
 
                 <div class="space-y-4">
+                    <button type="button" id="printBarcodeButton" onclick="printBarcode()" class="w-full border-2 border-blue-200 text-[#0033ab] py-4 rounded-xl font-bold text-lg hover:bg-blue-50 transition">
+                        Print Barcode
+                    </button>
                     <button onclick="window.location.reload()" class="w-full bg-[#0033ab] text-white py-4 rounded-xl font-bold text-lg hover:bg-blue-800 transition">Done</button>
                     <button onclick="toggleSection('form')" class="w-full border-2 border-blue-200 text-blue-500 py-4 rounded-xl font-bold text-lg hover:bg-blue-50 transition">Input Other Invoice</button>
                 </div>
@@ -149,22 +160,10 @@
 
         const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
         const form = document.getElementById('invoiceForm');
-        const manualRows = document.getElementById('manualRows');
-        const addManualRowButton = document.getElementById('addManualRow');
         const formError = document.getElementById('formError');
         const vendorOptionsUrl = '/vendors/options';
+        let latestBarcodeValue = '';
         let vendorOptions = [];
-
-        function updateRemoveButtons() {
-            const rows = manualRows.querySelectorAll('.manual-entry-row');
-
-            rows.forEach((row, index) => {
-                const removeButton = row.querySelector('.remove-row');
-                removeButton.classList.toggle('hidden', rows.length === 1);
-                removeButton.disabled = rows.length === 1;
-                removeButton.dataset.rowIndex = index;
-            });
-        }
 
         function buildVendorSelect(selectedValue = '') {
             const defaultLabel = vendorOptions.length === 0 ? 'Loading vendors...' : 'Select Vendor';
@@ -183,30 +182,10 @@
         }
 
         function hydrateVendorSelects() {
-            manualRows.querySelectorAll('.vendor-select-slot').forEach((slot) => {
+            document.querySelectorAll('.vendor-select-slot').forEach((slot) => {
                 const selectedValue = slot.dataset.selectedValue || '';
                 slot.innerHTML = buildVendorSelect(selectedValue);
             });
-        }
-
-        function createManualRow() {
-            const row = document.createElement('div');
-            row.className = 'manual-entry-row grid grid-cols-1 gap-3 rounded-2xl border border-gray-100 bg-[#f8fbff] p-4 md:grid-cols-2';
-            row.innerHTML = `
-                <input type="text" name="box_id[]" placeholder="BOX ID" class="w-full rounded-xl border border-gray-200 p-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
-                <input type="text" name="item_name[]" placeholder="Item Name" class="w-full rounded-xl border border-gray-200 p-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
-                <input type="number" name="quantity[]" placeholder="Quantity" min="0" class="w-full rounded-xl border border-gray-200 p-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
-                <div class="flex gap-3">
-                    <div class="vendor-select-slot w-full" data-selected-value=""></div>
-                    <button type="button" class="remove-row rounded-xl border border-red-200 px-4 text-sm font-semibold text-red-500 transition hover:bg-red-50">
-                        Remove
-                    </button>
-                </div>
-            `;
-
-            const slot = row.querySelector('.vendor-select-slot');
-            slot.innerHTML = buildVendorSelect();
-            return row;
         }
 
         async function loadVendors() {
@@ -236,39 +215,18 @@
             }
         }
 
-        addManualRowButton.addEventListener('click', () => {
-            manualRows.appendChild(createManualRow());
-            updateRemoveButtons();
-        });
-
-        manualRows.addEventListener('click', (event) => {
-            const removeButton = event.target.closest('.remove-row');
-
-            if (!removeButton) {
-                return;
-            }
-
-            removeButton.closest('.manual-entry-row')?.remove();
-            updateRemoveButtons();
-        });
-
         form.addEventListener('submit', async (e) => {
             e.preventDefault();
             formError.classList.add('hidden');
             formError.textContent = '';
 
-            const manualEntries = Array.from(manualRows.querySelectorAll('.manual-entry-row')).map((row) => ({
-                box_id: row.querySelector('input[name="box_id[]"]').value.trim(),
-                item_name: row.querySelector('input[name="item_name[]"]').value.trim(),
-                quantity: Number(row.querySelector('input[name="quantity[]"]').value),
-                vendor_name: row.querySelector('select[name="vendor_name[]"]').value.trim()
-            }));
-
             const payload = {
-                po_number: document.getElementById('po_number').value.trim(),
+                vendor_name: document.querySelector('select[name="vendor_name[]"]').value.trim(),
+                product_name: document.getElementById('product_name').value.trim(),
+                invoice_id: document.getElementById('invoice_id').value.trim(),
+                product_id: document.getElementById('product_id').value.trim(),
                 box_count: Number(document.getElementById('box_count').value),
-                arrival_date: document.getElementById('arrival_date').value || null,
-                manual_entries: manualEntries
+                arrival_date: document.getElementById('arrival_date').value || null
             };
 
             try {
@@ -288,8 +246,16 @@
                     throw new Error(data.message || 'Failed to create invoice');
                 }
 
-                document.getElementById('res-po').innerText = document.getElementById('po_number').value;
-                document.getElementById('res-manual-count').innerText = `${manualEntries.length} baris`;
+                const savedStatus = data.data?.status || 'pending';
+                latestBarcodeValue = data.data?.qr_text || '';
+                document.getElementById('res-vendor').innerText = payload.vendor_name;
+                document.getElementById('res-invoice').innerText = payload.invoice_id;
+                document.getElementById('res-product-name').innerText = payload.product_name;
+                document.getElementById('res-product-id').innerText = payload.product_id;
+                document.getElementById('res-box-count').innerText = String(payload.box_count);
+                document.getElementById('res-arrival-date').innerText = formatArrivalDate(payload.arrival_date);
+                applyStatusBadge(savedStatus);
+                renderBarcode(latestBarcodeValue || payload.invoice_id);
                 
                 toggleSection('success');
 
@@ -306,12 +272,134 @@
             } else {
                 document.getElementById('formSection').classList.remove('hidden');
                 document.getElementById('successSection').classList.add('hidden');
+                latestBarcodeValue = '';
                 form.reset();
             }
         }
 
+        function formatArrivalDate(value) {
+            if (!value) {
+                return '-';
+            }
+
+            const [year, month, day] = value.split('-');
+
+            if (!year || !month || !day) {
+                return value;
+            }
+
+            return `${day}/${month}/${year}`;
+        }
+
+        function applyStatusBadge(statusValue) {
+            const normalizedStatus = String(statusValue || '').trim().toUpperCase();
+            const badge = document.getElementById('res-status-badge');
+            const icon = document.getElementById('res-status-icon');
+            const text = document.getElementById('res-status-text');
+
+            if (!badge || !icon || !text) {
+                return;
+            }
+
+            if (normalizedStatus === 'MATCH' || normalizedStatus === 'DONE' || normalizedStatus === 'TERVERIFIKASI') {
+                badge.className = 'inline-flex items-center gap-2 rounded-full border border-lime-400 bg-white px-4 py-1 text-xs font-bold text-lime-500';
+                icon.setAttribute('data-lucide', 'circle-check');
+                text.textContent = normalizedStatus === 'TERVERIFIKASI' ? 'Terverifikasi' : 'Done';
+            } else if (normalizedStatus === 'NOT_SCANNED' || normalizedStatus === 'PENDING') {
+                badge.className = 'inline-flex items-center gap-2 rounded-full border border-orange-300 bg-orange-50 px-4 py-1 text-xs font-bold text-orange-500';
+                icon.setAttribute('data-lucide', 'alert-triangle');
+                text.textContent = normalizedStatus === 'NOT_SCANNED' ? 'Not Scanned' : 'Pending';
+            } else if (normalizedStatus === 'MISMATCH' || normalizedStatus === 'OVER' || normalizedStatus === 'LESS') {
+                badge.className = 'inline-flex items-center gap-2 rounded-full border border-red-300 bg-red-50 px-4 py-1 text-xs font-bold text-red-600';
+                icon.setAttribute('data-lucide', 'circle-alert');
+                text.textContent = normalizedStatus.charAt(0) + normalizedStatus.slice(1).toLowerCase();
+            } else {
+                badge.className = 'inline-flex items-center gap-2 rounded-full border border-gray-300 bg-gray-50 px-4 py-1 text-xs font-bold text-gray-600';
+                icon.setAttribute('data-lucide', 'circle-help');
+                text.textContent = normalizedStatus || 'Unknown';
+            }
+
+            lucide.createIcons();
+        }
+
+        function renderBarcode(value) {
+            const barcodeText = document.getElementById('barcodeText');
+            const barcodeValue = String(value || '').trim();
+
+            if (!barcodeValue) {
+                barcodeText.textContent = 'Barcode not available';
+                document.getElementById('barcodePreview').innerHTML = '';
+                return;
+            }
+
+            JsBarcode('#barcodePreview', barcodeValue, {
+                format: 'CODE128',
+                lineColor: '#163a8a',
+                width: 2,
+                height: 64,
+                displayValue: false,
+                margin: 8,
+            });
+
+            barcodeText.textContent = barcodeValue;
+        }
+
+        function printBarcode() {
+            if (!latestBarcodeValue) {
+                return;
+            }
+
+            const printWindow = window.open('', '_blank', 'width=600,height=700');
+
+            if (!printWindow) {
+                return;
+            }
+
+            const invoiceId = document.getElementById('res-invoice').innerText;
+            const productName = document.getElementById('res-product-name').innerText;
+            const productId = document.getElementById('res-product-id').innerText;
+
+            printWindow.document.write(`
+                <!DOCTYPE html>
+                <html lang="en">
+                <head>
+                    <meta charset="UTF-8">
+                    <title>Print Barcode</title>
+                    <script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.6/dist/JsBarcode.all.min.js"><\/script>
+                    <style>
+                        body { font-family: Arial, sans-serif; padding: 24px; text-align: center; }
+                        .label { border: 1px solid #dbeafe; border-radius: 16px; padding: 24px; }
+                        .meta { margin-top: 12px; color: #334155; font-size: 14px; }
+                        .value { margin-top: 8px; font-weight: 700; word-break: break-all; }
+                    </style>
+                </head>
+                <body>
+                    <div class="label">
+                        <h2>Invoice Barcode</h2>
+                        <svg id="printBarcodeSvg"></svg>
+                        <div class="meta">Invoice ID: ${invoiceId}</div>
+                        <div class="meta">Product: ${productName}</div>
+                        <div class="meta">Product ID: ${productId}</div>
+                        <div class="value">${latestBarcodeValue}</div>
+                    </div>
+                    <script>
+                        JsBarcode('#printBarcodeSvg', ${JSON.stringify(latestBarcodeValue)}, {
+                            format: 'CODE128',
+                            lineColor: '#163a8a',
+                            width: 2,
+                            height: 90,
+                            displayValue: false,
+                            margin: 10
+                        });
+                        window.onload = () => { window.print(); };
+                    <\/script>
+                </body>
+                </html>
+            `);
+            printWindow.document.close();
+        }
+
         hydrateVendorSelects();
-        updateRemoveButtons();
         loadVendors();
     </script>
 </body>

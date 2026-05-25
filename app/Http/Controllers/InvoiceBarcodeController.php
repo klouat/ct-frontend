@@ -7,19 +7,10 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Http;
 
-class InvoiceController extends Controller
+class InvoiceBarcodeController extends Controller
 {
-    public function store(Request $request): JsonResponse
+    public function index(Request $request): JsonResponse
     {
-        $validated = $request->validate([
-            'invoice_id' => ['required', 'string', 'max:100'],
-            'vendor_name' => ['required', 'string', 'max:100'],
-            'product_name' => ['required', 'string', 'max:150'],
-            'product_id' => ['required', 'string', 'max:100'],
-            'box_count' => ['required', 'integer', 'min:1'],
-            'arrival_date' => ['nullable', 'date'],
-        ]);
-
         $auth = $request->session()->get('svs_auth');
         $token = data_get($auth, 'access_token');
 
@@ -29,22 +20,16 @@ class InvoiceController extends Controller
             ], 401);
         }
 
-        $payload = [
-            'invoice_code' => $validated['invoice_id'],
-            'po_number' => $validated['invoice_id'],
-            'vendor_name' => $validated['vendor_name'],
-            'product_name' => $validated['product_name'],
-            'product_id' => $validated['product_id'],
-            'target_box_count' => $validated['box_count'],
-            'estimated_arrival_date' => $validated['arrival_date'] ?? null,
-        ];
+        $query = array_filter([
+            'per_page' => $request->integer('per_page', 100),
+        ], fn (mixed $value): bool => $value !== '' && $value !== null);
 
         try {
             $response = Http::acceptJson()
                 ->withoutVerifying()
                 ->timeout(20)
                 ->withToken($token)
-                ->post($this->apiUrl('/api/invoices'), $payload);
+                ->get($this->apiUrl('/api/invoices'), $query);
         } catch (ConnectionException) {
             return response()->json([
                 'message' => 'Could not reach the SVS API at port 8000.',
@@ -59,15 +44,15 @@ class InvoiceController extends Controller
 
         if (! $response->successful()) {
             return response()->json([
-                'message' => $this->extractMessage($body, 'Failed to create invoice'),
+                'message' => $this->extractMessage($body, 'Failed to load invoices'),
                 'errors' => $body['errors'] ?? null,
             ], $response->status());
         }
 
         return response()->json([
-            'message' => $this->extractMessage($body, 'Invoice created successfully'),
+            'message' => $this->extractMessage($body, 'Invoices loaded successfully'),
             'data' => data_get($body, 'data'),
-        ], $response->status());
+        ]);
     }
 
     private function apiUrl(string $path): string

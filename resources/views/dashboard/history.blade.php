@@ -30,7 +30,7 @@
                 <div class="flex gap-3 mb-8">
                     <div class="relative flex-grow">
                         <i data-lucide="search" class="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400"></i>
-                        <input type="text" id="searchInput" placeholder="Search SKU or Item Name" 
+                        <input type="text" id="searchInput" placeholder="Search Invoice ID, Product ID, or Product Name" 
                                class="w-full pl-12 pr-4 py-3 bg-white border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 transition shadow-sm">
                     </div>
                     <button id="searchButton" class="px-4 py-3 bg-white border border-gray-200 rounded-xl hover:bg-gray-50 transition shadow-sm">
@@ -150,40 +150,75 @@
             }
 
             items.forEach(item => {
-                const quantityLabel = `${item.quantity} pcs`;
+                const quantityLabel = `${item.box_quantity} box`;
                 const locationLabel = item.location || 'No location recorded';
-                const statusTone = item.status === 'MATCH'
-                    ? 'bg-green-100 text-green-700'
-                    : item.status === 'MISMATCH'
-                        ? 'bg-red-100 text-red-700'
-                        : 'bg-yellow-100 text-yellow-700';
+                const isNotScanned = item.status === 'NOT_SCANNED';
+                const isPending = item.status === 'PENDING';
+                const isOnProgress = item.status === 'ON_PROGRESS';
+                const isDone = item.status === 'MATCH' || item.status === 'DONE' || item.status === 'TERVERIFIKASI';
+                const statusTone = isDone
+                    ? 'border border-lime-400 bg-white text-lime-500'
+                    : isNotScanned
+                        ? 'border border-orange-300 bg-orange-50 text-orange-500'
+                        : isOnProgress
+                        ? 'border border-blue-400 bg-blue-50 text-blue-600'
+                        : isPending
+                        ? 'border border-orange-300 bg-orange-50 text-orange-500'
+                        : item.status === 'MISMATCH'
+                            ? 'border border-red-300 bg-red-50 text-red-700'
+                            : item.status === 'LESS' || item.status === 'OVER'
+                                ? 'border border-red-300 bg-red-50 text-red-700'
+                            : 'bg-yellow-100 text-yellow-700';
+                const statusLabel = isDone
+                    ? 'Done'
+                    : isNotScanned
+                        ? 'Not Scanned'
+                    : isOnProgress
+                        ? 'On Progress'
+                    : isPending
+                        ? 'Pending'
+                    : item.status;
+                const statusIcon = isNotScanned || isPending
+                    ? '<i data-lucide="alert-triangle" class="w-4 h-4"></i>'
+                    : isOnProgress
+                        ? '<i data-lucide="scan-line" class="w-4 h-4"></i>'
+                    : isDone
+                        ? '<i data-lucide="circle-check" class="w-4 h-4"></i>'
+                        : item.status === 'LESS' || item.status === 'OVER' || item.status === 'MISMATCH'
+                            ? '<i data-lucide="circle-alert" class="w-4 h-4"></i>'
+                    : '';
                 const card = `
-                    <div class="bg-white p-6 rounded-2xl border border-gray-100 shadow-sm flex flex-col md:flex-row md:items-center gap-6 hover:shadow-md transition">
-                        <!-- Icon Square -->
-                        <div class="w-16 h-16 bg-blue-50 rounded-xl flex items-center justify-center text-[#0033ab] shrink-0">
-                            <i data-lucide="package" class="w-8 h-8"></i>
+                    <div class="rounded-2xl border border-gray-200 bg-white p-4 shadow-sm transition hover:shadow-md">
+                        <div class="flex items-start gap-4">
+                            <div class="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-[#f4f2ff] text-[#173a8f]">
+                                <i data-lucide="package" class="w-6 h-6"></i>
+                            </div>
+
+                            <div class="min-w-0 flex-1">
+                                <span class="text-xs font-bold uppercase tracking-widest text-gray-400">Product ID: ${item.product_id || '-'}</span>
+                                <h3 class="mt-1 text-2xl font-black leading-tight text-gray-800">${item.product_name || '-'}</h3>
+                                <p class="mt-1 text-sm font-semibold text-gray-500">Invoice: ${item.invoice_code || '-'}</p>
+                            </div>
                         </div>
 
-                        <!-- Info Area -->
-                        <div class="flex-grow">
-                            <span class="text-xs font-bold text-gray-400 uppercase tracking-widest">SKU: ${item.sku}</span>
-                            <h3 class="text-xl font-black text-gray-800 leading-tight">${item.item_name}</h3>
-                            
-                            <div class="flex flex-wrap items-center gap-x-8 gap-y-2 mt-4">
-                                <div class="flex items-center gap-10">
-                                    <span class="text-sm font-bold text-gray-400">Quantity</span>
-                                    <span class="bg-blue-100 text-[#0033ab] px-4 py-1 rounded-full text-sm font-black">${quantityLabel}</span>
-                                </div>
-                                <div class="flex items-center gap-10">
-                                    <span class="text-sm font-bold text-gray-400">Location</span>
-                                    <div class="flex items-center gap-1 text-gray-600 font-bold">
-                                        <i data-lucide="map-pin" class="w-4 h-4"></i>
-                                        <span>${locationLabel}</span>
-                                    </div>
-                                </div>
-                                <div class="flex items-center gap-3">
-                                    <span class="text-sm font-bold text-gray-400">Status</span>
-                                    <span class="px-4 py-1 rounded-full text-sm font-black ${statusTone}">${item.status}</span>
+                        <div class="mt-5 space-y-4">
+                            <div class="flex items-center justify-between gap-4">
+                                <span class="text-sm font-bold text-gray-400">Status</span>
+                                <span class="inline-flex items-center gap-2 rounded-full px-4 py-1 text-sm font-black ${statusTone}">${statusIcon}<span>${statusLabel}</span></span>
+                            </div>
+                            <div class="flex items-center justify-between gap-4">
+                                <span class="text-sm font-bold text-gray-400">Vendor</span>
+                                <span class="text-base font-semibold text-gray-700">${item.vendor_name || '-'}</span>
+                            </div>
+                            <div class="flex items-center justify-between gap-4">
+                                <span class="text-sm font-bold text-gray-400">Quantity</span>
+                                <span class="rounded-full bg-blue-100 px-4 py-1 text-sm font-black text-[#173a8f]">${quantityLabel}</span>
+                            </div>
+                            <div class="flex items-center justify-between gap-4">
+                                <span class="text-sm font-bold text-gray-400">Location</span>
+                                <div class="flex items-center gap-1 text-base font-semibold text-gray-600">
+                                    <i data-lucide="map-pin" class="w-4 h-4"></i>
+                                    <span>${locationLabel}</span>
                                 </div>
                             </div>
                         </div>

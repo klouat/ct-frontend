@@ -88,9 +88,9 @@
                         <h2 class="text-3xl font-black tracking-tight text-gray-800 sm:text-4xl">Verification</h2>
                         <p id="systemStatus" class="mt-1 font-bold text-gray-400">Record Detail</p>
                     </div>
-                    <div id="matchBadge" class="flex w-full items-center justify-center gap-2 rounded-full border-2 border-green-500 bg-green-50 px-5 py-2 text-sm font-black uppercase tracking-wider text-green-600 sm:w-auto sm:justify-start sm:px-6">
+                    <div id="matchBadge" class="flex w-full items-center justify-center gap-2 rounded-full border-2 border-gray-300 bg-gray-50 px-5 py-2 text-sm font-black uppercase tracking-wider text-gray-600 sm:w-auto sm:justify-start sm:px-6">
                         <i id="statusIcon" data-lucide="check-circle" class="w-5 h-5"></i>
-                        <span id="statusText">Match</span>
+                        <span id="statusText">Not Scanned</span>
                     </div>
                 </div>
 
@@ -98,8 +98,8 @@
                 <div class="mb-8 space-y-4 sm:mb-10">
                     <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
                         <div class="group rounded-2xl border border-blue-50 bg-[#f8faff] p-4 transition-all hover:shadow-md sm:p-5">
-                            <label class="text-gray-400 text-[10px] font-black uppercase tracking-widest mb-2 block">Box ID</label>
-                            <input type="text" id="boxId" value="BOX-9928" 
+                            <label class="text-gray-400 text-[10px] font-black uppercase tracking-widest mb-2 block">Product ID</label>
+                            <input type="text" id="productId" value="PD-0123" 
                                 class="w-full border-b-2 border-transparent bg-transparent text-lg font-black text-gray-800 transition-all focus:border-blue-400 focus:outline-none sm:text-xl md:text-2xl">
                         </div>
                         <div class="group rounded-2xl border border-blue-50 bg-[#f8faff] p-4 transition-all hover:shadow-md sm:p-5">
@@ -119,6 +119,18 @@
                             <i data-lucide="truck" class="w-7 h-7"></i>
                         </div>
                     </div>
+                    <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                        <div class="group rounded-2xl border border-blue-50 bg-[#f8faff] p-4 transition-all hover:shadow-md sm:p-5">
+                            <label class="text-gray-400 text-[10px] font-black uppercase tracking-widest mb-2 block">Scanned Boxes</label>
+                            <input type="text" id="scannedCount" value="0 / 0"
+                                class="w-full border-b-2 border-transparent bg-transparent text-lg font-black text-gray-800 transition-all focus:border-blue-400 focus:outline-none sm:text-xl md:text-2xl">
+                        </div>
+                        <div class="group rounded-2xl border border-blue-50 bg-[#f8faff] p-4 transition-all hover:shadow-md sm:p-5">
+                            <label class="text-gray-400 text-[10px] font-black uppercase tracking-widest mb-2 block">Remaining</label>
+                            <input type="text" id="remainingCount" value="0"
+                                class="w-full border-b-2 border-transparent bg-transparent text-lg font-black text-gray-800 transition-all focus:border-blue-400 focus:outline-none sm:text-xl md:text-2xl">
+                        </div>
+                    </div>
                 </div>
 
                 <!-- Buttons -->
@@ -128,10 +140,10 @@
                         Confirm Data
                     </button>
                     <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
-                        <button onclick="alert('Pending')" class="rounded-[1.25rem] border-2 border-blue-100 bg-white py-4 text-lg font-bold text-[#0033ab] transition hover:bg-blue-50">
+                        <button id="pendingButton" onclick="markPending()" class="rounded-[1.25rem] border-2 border-blue-100 bg-white py-4 text-lg font-bold text-[#0033ab] transition hover:bg-blue-50">
                             Pending
                         </button>
-                        <button onclick="window.location.reload()" class="rounded-[1.25rem] border-2 border-red-100 bg-white py-4 text-lg font-bold text-red-500 transition hover:bg-red-50">
+                        <button id="endButton" onclick="completeScan()" class="rounded-[1.25rem] border-2 border-red-100 bg-white py-4 text-lg font-bold text-red-500 transition hover:bg-red-50">
                             End
                         </button>
                     </div>
@@ -154,15 +166,16 @@
     <script>
         lucide.createIcons();
 
-        const SCAN_API = "http://127.0.0.1:8000/api/scan";
-        const USER_ID = 123;
+        const SCAN_API = "/scan/data";
         const cameraStatus = document.getElementById('cameraStatus');
         const cameraVideo = document.getElementById('cameraVideo');
+        const csrfToken = '{{ csrf_token() }}';
         let isHandlingScan = false;
         let lastScannedText = '';
         let lastScanAt = 0;
         let mediaStream = null;
         let detectorInterval = null;
+        let activeInvoiceId = null;
         const scanCanvas = document.createElement('canvas');
         const scanContext = scanCanvas.getContext('2d', { willReadFrequently: true });
 
@@ -196,8 +209,13 @@
             try {
                 const response = await fetch(SCAN_API, {
                     method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ qr_text: normalizedText, user_id: USER_ID })
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json',
+                        'X-CSRF-TOKEN': csrfToken
+                    },
+                    credentials: 'same-origin',
+                    body: JSON.stringify({ qr_text: normalizedText })
                 });
                 const result = await response.json();
 
@@ -219,28 +237,100 @@
         }
 
         function updateUI(data) {
-            document.getElementById('boxId').value = data.package.box_code;
-            document.getElementById('invoiceId').value = data.package.shipment_code;
-            document.getElementById('vendorName').value = data.package.vendor_name;
-            
-            const badge = document.getElementById('matchBadge');
-            const statusText = document.getElementById('statusText');
-            statusText.textContent = data.verification.status;
-            
-            if (data.verification.status === "MATCH") {
-                badge.className = "flex w-full items-center justify-center gap-2 rounded-full border-2 border-green-500 bg-green-50 px-5 py-2 text-sm font-black uppercase tracking-wider text-green-600 sm:w-auto sm:justify-start sm:px-6";
+            if (data.record_type === 'invoice' && data.invoice) {
+                activeInvoiceId = data.invoice.invoice_id || null;
+                document.getElementById('productId').value = data.invoice.product_id || '-';
+                document.getElementById('invoiceId').value = data.invoice.invoice_code || '-';
+                document.getElementById('vendorName').value = data.invoice.vendor_name || '-';
+                document.getElementById('scannedCount').value = `${data.invoice.scanned_box_count || 0} / ${data.invoice.box_quantity || 0}`;
+                document.getElementById('remainingCount').value = `${data.invoice.remaining_box_count || 0}`;
             } else {
-                badge.className = "flex w-full items-center justify-center gap-2 rounded-full border-2 border-red-500 bg-red-50 px-5 py-2 text-sm font-black uppercase tracking-wider text-red-600 sm:w-auto sm:justify-start sm:px-6";
+                activeInvoiceId = null;
+                document.getElementById('productId').value = data.package.box_code;
+                document.getElementById('invoiceId').value = data.package.invoice_po_number;
+                document.getElementById('vendorName').value = data.package.vendor_name;
+                document.getElementById('scannedCount').value = '-';
+                document.getElementById('remainingCount').value = '-';
             }
+
+            setStatusBadge(data.verification.status);
         }
 
         function handleConfirm() {
             const finalData = {
-                box: document.getElementById('boxId').value,
+                product: document.getElementById('productId').value,
                 invoice: document.getElementById('invoiceId').value,
                 vendor: document.getElementById('vendorName').value
             };
-            alert("Confirmed: " + finalData.box);
+            alert("Confirmed: " + finalData.invoice);
+        }
+
+        async function markPending() {
+            if (!activeInvoiceId) {
+                alert('Scan an invoice barcode first.');
+                return;
+            }
+
+            await updateInvoiceScanStatus(`/scan/invoices/${activeInvoiceId}/pending`);
+        }
+
+        async function completeScan() {
+            if (!activeInvoiceId) {
+                alert('Scan an invoice barcode first.');
+                return;
+            }
+
+            await updateInvoiceScanStatus(`/scan/invoices/${activeInvoiceId}/complete`);
+        }
+
+        async function updateInvoiceScanStatus(url) {
+            try {
+                const response = await fetch(url, {
+                    method: 'POST',
+                    headers: {
+                        'Accept': 'application/json',
+                        'X-CSRF-TOKEN': csrfToken
+                    },
+                    credentials: 'same-origin'
+                });
+                const result = await response.json();
+
+                if (!response.ok) {
+                    throw new Error(result.message || 'Failed to update invoice status');
+                }
+
+                const data = result.data || {};
+                document.getElementById('scannedCount').value = `${data.scanned_box_count || 0} / ${data.target_box_count || 0}`;
+                document.getElementById('remainingCount').value = `${Math.max((data.target_box_count || 0) - (data.scanned_box_count || 0), 0)}`;
+                setStatusBadge(data.status || 'pending');
+                document.getElementById('systemStatus').textContent = result.message || 'Status updated';
+            } catch (error) {
+                alert(error.message || 'Failed to update invoice status');
+            }
+        }
+
+        function setStatusBadge(status) {
+            const normalized = String(status || '').trim().toUpperCase();
+            const badge = document.getElementById('matchBadge');
+            const icon = document.getElementById('statusIcon');
+            const text = document.getElementById('statusText');
+
+            const styles = normalized === 'MATCH'
+                ? ['border-green-500 bg-green-50 text-green-600', 'check-circle', 'Match']
+                : normalized === 'LESS'
+                    ? ['border-red-500 bg-red-50 text-red-600', 'circle-alert', 'Less']
+                    : normalized === 'OVER'
+                        ? ['border-red-500 bg-red-50 text-red-600', 'circle-alert', 'Over']
+                        : normalized === 'PENDING'
+                            ? ['border-orange-400 bg-orange-50 text-orange-500', 'alert-triangle', 'Pending']
+                            : normalized === 'ON_PROGRESS'
+                                ? ['border-blue-500 bg-blue-50 text-blue-600', 'scan-line', 'On Progress']
+                                : ['border-gray-300 bg-gray-50 text-gray-600', 'circle-help', 'Not Scanned'];
+
+            badge.className = `flex w-full items-center justify-center gap-2 rounded-full border-2 px-5 py-2 text-sm font-black uppercase tracking-wider sm:w-auto sm:justify-start sm:px-6 ${styles[0]}`;
+            icon.setAttribute('data-lucide', styles[1]);
+            text.textContent = styles[2];
+            lucide.createIcons();
         }
 
         function setCameraStatus(message) {

@@ -21,7 +21,6 @@
     <main class="flex-grow flex items-center justify-center px-4 pb-12">
         <div class="w-full max-w-md bg-white rounded-3xl shadow-sm border border-blue-50 p-8 md:p-10">
             
-            <!-- Icon and Header -->
             <div class="flex flex-col items-center mb-6">
                 <div class="w-20 h-20 mb-4 bg-[#d0e1ff] rounded-full flex items-center justify-center text-[#0033ab]">
                     <i data-lucide="user-plus" class="w-10 h-10"></i>
@@ -32,28 +31,38 @@
 
             <form id="registerForm" class="space-y-4">
                 
-                <!-- Username -->
                 <div>
-                    <label class="block text-sm font-bold text-gray-800 mb-1">Username</label>
+                    <label class="block text-sm font-bold text-gray-800 mb-2">Username</label>
                     <div class="relative">
                         <span class="absolute inset-y-0 left-3 flex items-center text-gray-400">
                             <i data-lucide="user" class="w-5 h-5"></i>
                         </span>
-                        <input type="text" id="username" placeholder="Enter username" maxlength="50" required
+                        <input type="text" id="username" placeholder="Enter your username" maxlength="50" required
                                class="w-full pl-10 pr-4 py-2.5 bg-[#f8f9fc] border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 transition">
                     </div>
                 </div>
 
-                <!-- Vendor / Role -->
                 <div>
-                    <label class="block text-sm font-bold text-gray-800 mb-1">Vendor / Role</label>
+                    <label class="block text-sm font-bold text-gray-800 mb-2">Email</label>
                     <div class="relative">
                         <span class="absolute inset-y-0 left-3 flex items-center text-gray-400">
-                            <i data-lucide="building-2" class="w-5 h-5"></i>
+                            <i data-lucide="mail" class="w-5 h-5"></i>
+                        </span>
+                        <input type="email" id="email" placeholder="Enter your email address" required
+                               class="w-full pl-10 pr-4 py-2.5 bg-[#f8f9fc] border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 transition">
+                    </div>
+                    <p class="mt-1 text-xs text-gray-400">You can log in with either your email or your username.</p>
+                </div>
+
+                <div>
+                    <label class="block text-sm font-bold text-gray-800 mb-2">Role</label>
+                    <div class="relative">
+                        <span class="absolute inset-y-0 left-3 flex items-center text-gray-400">
+                            <i data-lucide="contact-round" class="w-5 h-5"></i>
                         </span>
                         <select id="role" required
                                 class="w-full pl-10 pr-10 py-2.5 bg-[#f8f9fc] border border-gray-200 rounded-xl appearance-none focus:outline-none focus:ring-2 focus:ring-blue-500 transition text-gray-500">
-                            <option value="" disabled selected>Select vendor / role</option>
+                            <option value="" disabled selected>Select role</option>
                             <option value="ADMIN">ADMIN</option>
                             <option value="OPERATOR">OPERATOR</option>
                             <option value="VENDOR">VENDOR</option>
@@ -65,21 +74,20 @@
                     </div>
                 </div>
 
-                <!-- Vendor ID -->
-                <div>
-                    <label class="block text-sm font-bold text-gray-800 mb-1">Vendor ID</label>
+                <div id="vendorField">
+                    <label class="block text-sm font-bold text-gray-800 mb-2">Vendor</label>
                     <div class="relative">
                         <span class="absolute inset-y-0 left-3 flex items-center text-gray-400">
-                            <i data-lucide="hash" class="w-5 h-5"></i>
+                            <i data-lucide="building-2" class="w-5 h-5"></i>
                         </span>
-                        <input type="number" id="vendor_id" placeholder="Enter 0 or leave blank for NULL"
+                        <input type="number" id="vendor_id" placeholder="Enter vendor ID or leave blank"
                                class="w-full pl-10 pr-4 py-2.5 bg-[#f8f9fc] border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 transition">
                     </div>
+                    <p class="mt-1 text-xs text-gray-400">Use the existing vendor ID from the old UI.</p>
                 </div>
 
-                <!-- Password -->
                 <div>
-                    <label class="block text-sm font-bold text-gray-800 mb-1">Password</label>
+                    <label class="block text-sm font-bold text-gray-800 mb-2">Password</label>
                     <div class="relative">
                         <span class="absolute inset-y-0 left-3 flex items-center text-gray-400">
                             <i data-lucide="lock" class="w-5 h-5"></i>
@@ -92,9 +100,8 @@
                     </div>
                 </div>
 
-                <!-- Confirm Password -->
                 <div>
-                    <label class="block text-sm font-bold text-gray-800 mb-1">Confirm Password</label>
+                    <label class="block text-sm font-bold text-gray-800 mb-2">Confirm Password</label>
                     <div class="relative">
                         <span class="absolute inset-y-0 left-3 flex items-center text-gray-400">
                             <i data-lucide="lock" class="w-5 h-5"></i>
@@ -107,7 +114,6 @@
                     </div>
                 </div>
 
-                <!-- Terms -->
                 <div class="flex items-center gap-2 py-2">
                     <input type="checkbox" id="terms" required class="w-5 h-5 rounded border-gray-300 text-blue-700 focus:ring-blue-500">
                     <label for="terms" class="text-sm text-gray-700">
@@ -115,25 +121,21 @@
                     </label>
                 </div>
 
-                <!-- Register Button -->
                 <button type="submit" class="w-full bg-[#0033ab] text-white py-3 rounded-xl font-bold text-lg hover:bg-blue-800 transition shadow-md">
                     Register
                 </button>
 
-                <!-- Divider -->
                 <div class="flex items-center py-2">
                     <div class="flex-1 h-px bg-gray-200"></div>
                     <span class="px-4 text-gray-400 text-sm">or</span>
                     <div class="flex-1 h-px bg-gray-200"></div>
                 </div>
 
-                <!-- Login Link -->
                 <div class="text-center">
                     <p class="text-sm text-gray-600 mb-1">Already have an account?</p>
                     <a href="/login" class="text-[#0033ab] font-bold text-lg hover:underline">Login</a>
                 </div>
 
-                <!-- Status Messages -->
                 <p id="msg" class="text-sm hidden text-center font-medium mt-4"></p>
             </form>
         </div>
@@ -163,16 +165,45 @@
             lucide.createIcons();
         }
 
+        function updateVendorFieldVisibility() {
+            const role = document.getElementById('role').value;
+            const vendorField = document.getElementById('vendorField');
+            const vendorInput = document.getElementById('vendor_id');
+            const requiresVendor = role === 'VENDOR' || role === 'DRIVER';
+
+            vendorField.classList.toggle('hidden', !requiresVendor);
+            vendorInput.required = requiresVendor;
+
+            if (!requiresVendor) {
+                vendorInput.value = '';
+            }
+        }
+
         document.getElementById('registerForm').addEventListener('submit', async function(e) {
             e.preventDefault();
             const msgEl = document.getElementById('msg');
             msgEl.className = "text-sm hidden text-center font-medium mt-4";
 
             const username = document.getElementById('username').value.trim();
+            const email = document.getElementById('email').value.trim();
             const password = document.getElementById('password').value;
             const confirm = document.getElementById('confirm_password').value;
             const role = document.getElementById('role').value;
             const vendor_id_input = document.getElementById('vendor_id').value;
+
+            if (!username) {
+                msgEl.textContent = "Username is required";
+                msgEl.classList.add('text-red-500', 'block');
+                msgEl.classList.remove('hidden');
+                return;
+            }
+
+            if (!email) {
+                msgEl.textContent = "Email is required";
+                msgEl.classList.add('text-red-500', 'block');
+                msgEl.classList.remove('hidden');
+                return;
+            }
 
             // Basic Client Validations
             if (password !== confirm) {
@@ -183,12 +214,12 @@
             }
 
             // --- PAYLOAD CONSTRUCTION ---
-            // Mapping: "0" or empty input -> null
             const payload = {
                 username: username,
+                email: email,
                 password: password,
                 role: role,
-                vendor_id: (vendor_id_input === "" || vendor_id_input === "0") ? null : parseInt(vendor_id_input)
+                vendor_id: vendor_id_input === "" ? null : parseInt(vendor_id_input, 10)
             };
 
             try {
@@ -221,6 +252,9 @@
                 msgEl.classList.remove('hidden');
             }
         });
+
+        document.getElementById('role').addEventListener('change', updateVendorFieldVisibility);
+        updateVendorFieldVisibility();
     </script>
 </body>
 </html>

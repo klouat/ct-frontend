@@ -85,10 +85,11 @@
 
                 <div class="flex flex-col gap-3 rounded-2xl border border-blue-50 bg-white px-5 py-4 shadow-sm sm:flex-row sm:items-center sm:justify-between">
                     <p id="paginationSummary" class="text-sm font-medium text-gray-500">Page 1</p>
-                    <div class="flex gap-3">
+                    <div class="flex flex-wrap items-center gap-3">
                         <button id="previousPage" type="button" class="rounded-xl border border-blue-200 px-4 py-2 font-bold text-[#0033ab] transition hover:bg-blue-50 disabled:cursor-not-allowed disabled:opacity-50">
                             Previous
                         </button>
+                        <div id="pageNumberList" class="flex flex-wrap items-center gap-2"></div>
                         <button id="nextPage" type="button" class="rounded-xl border border-blue-200 px-4 py-2 font-bold text-[#0033ab] transition hover:bg-blue-50 disabled:cursor-not-allowed disabled:opacity-50">
                             Next
                         </button>
@@ -107,6 +108,7 @@
         const pageMessage = document.getElementById('pageMessage');
         const logsTableBody = document.getElementById('logsTableBody');
         const paginationSummary = document.getElementById('paginationSummary');
+        const pageNumberList = document.getElementById('pageNumberList');
         const logCount = document.getElementById('logCount');
         const actionFilter = document.getElementById('actionFilter');
         const tableFilter = document.getElementById('tableFilter');
@@ -241,6 +243,44 @@
             `).join('');
         }
 
+        function getVisiblePageNumbers() {
+            const maxVisible = 5;
+
+            if (lastPage <= maxVisible) {
+                return Array.from({ length: lastPage }, (_, index) => index + 1);
+            }
+
+            let startPage = Math.max(currentPage - 2, 1);
+            let endPage = startPage + maxVisible - 1;
+
+            if (endPage > lastPage) {
+                endPage = lastPage;
+                startPage = endPage - maxVisible + 1;
+            }
+
+            return Array.from({ length: endPage - startPage + 1 }, (_, index) => startPage + index);
+        }
+
+        function renderPagination() {
+            const visiblePages = getVisiblePageNumbers();
+
+            pageNumberList.innerHTML = visiblePages.map((page) => {
+                const activeClasses = page === currentPage
+                    ? 'bg-[#0033ab] text-white border-[#0033ab]'
+                    : 'border-blue-200 text-[#0033ab] hover:bg-blue-50';
+
+                return `
+                    <button
+                        type="button"
+                        class="rounded-xl border px-4 py-2 text-sm font-bold transition ${activeClasses}"
+                        data-page-number="${page}"
+                    >
+                        ${page}
+                    </button>
+                `;
+            }).join('');
+        }
+
         async function loadAuditLogs(page = 1) {
             setPageMessage('');
             logsTableBody.innerHTML = `
@@ -299,9 +339,11 @@
                 paginationSummary.textContent = `Page ${currentPage} of ${lastPage}`;
                 previousPageButton.disabled = currentPage <= 1;
                 nextPageButton.disabled = currentPage >= lastPage;
+                renderPagination();
             } catch (error) {
                 setPageMessage(error.message || 'Failed to load audit logs');
                 renderLogs([]);
+                pageNumberList.innerHTML = '';
             }
         }
 
@@ -317,6 +359,19 @@
         nextPageButton.addEventListener('click', () => {
             if (currentPage < lastPage) {
                 loadAuditLogs(currentPage + 1);
+            }
+        });
+        pageNumberList.addEventListener('click', (event) => {
+            const button = event.target.closest('[data-page-number]');
+
+            if (!button) {
+                return;
+            }
+
+            const page = Number(button.dataset.pageNumber || 1);
+
+            if (!Number.isNaN(page) && page !== currentPage) {
+                loadAuditLogs(page);
             }
         });
         userFilter.addEventListener('input', () => {

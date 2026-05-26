@@ -33,12 +33,6 @@ class AuditLogController extends Controller
                 ->timeout(20)
                 ->withToken($token)
                 ->get($this->apiUrl('/api/audit-logs'), $query);
-
-            $this->logActivity($token, [
-                'action' => 'VIEW_AUDIT_LOG_DATA',
-                'table_name' => 'audit_logs',
-                'description' => 'Viewed audit log data',
-            ]);
         } catch (ConnectionException) {
             return response()->json([
                 'message' => 'Could not reach the SVS API at port 8000.',

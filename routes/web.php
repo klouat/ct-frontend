@@ -67,3 +67,4 @@ Route::get('/audit-logs', function () {
     return view('dashboard.audit-logs');
 })->middleware('frontend.auth:ADMIN');
 Route::get('/audit-logs/data', [AuditLogController::class, 'index'])->middleware('frontend.auth:ADMIN');
+Route::get('/audit-logs/users', [AuditLogController::class, 'searchUsers'])->middleware('frontend.auth:ADMIN');

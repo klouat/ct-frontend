@@ -44,16 +44,17 @@
                                 class="w-full rounded-xl border border-gray-200 px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-500">
                         </div>
                         <div>
-                            <label for="userFilter" class="mb-2 block text-sm font-semibold text-gray-600">User ID</label>
-                            <input id="userFilter" type="number" min="1" placeholder="1"
-                                class="w-full rounded-xl border border-gray-200 px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                            <label for="userFilter" class="mb-2 block text-sm font-semibold text-gray-600">User Name</label>
+                            <div class="relative">
+                                <input id="userFilter" type="text" placeholder="Search username..."
+                                    autocomplete="off"
+                                    class="w-full rounded-xl border border-gray-200 px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                <div id="userSuggestions" class="absolute left-0 right-0 top-full z-20 mt-2 hidden overflow-hidden rounded-2xl border border-blue-100 bg-white shadow-xl"></div>
+                            </div>
                         </div>
-                        <div class="flex items-end gap-3">
+                        <div class="flex items-end">
                             <button id="applyFilters" type="button" class="w-full rounded-xl bg-[#0033ab] px-4 py-3 font-bold text-white transition hover:bg-blue-800">
                                 Apply
-                            </button>
-                            <button id="resetFilters" type="button" class="w-full rounded-xl border border-blue-200 px-4 py-3 font-bold text-[#0033ab] transition hover:bg-blue-50">
-                                Reset
                             </button>
                         </div>
                     </div>
@@ -101,6 +102,7 @@
         lucide.createIcons();
 
         const logsApiUrl = '/audit-logs/data';
+        const auditLogUsersUrl = '/audit-logs/users';
         const activityLogUrl = '/activity-log';
         const pageMessage = document.getElementById('pageMessage');
         const logsTableBody = document.getElementById('logsTableBody');
@@ -109,11 +111,13 @@
         const actionFilter = document.getElementById('actionFilter');
         const tableFilter = document.getElementById('tableFilter');
         const userFilter = document.getElementById('userFilter');
+        const userSuggestions = document.getElementById('userSuggestions');
         const previousPageButton = document.getElementById('previousPage');
         const nextPageButton = document.getElementById('nextPage');
 
         let currentPage = 1;
         let lastPage = 1;
+        let userSuggestionTimer = null;
 
         function setPageMessage(text, tone = 'error') {
             if (!text) {
@@ -164,6 +168,51 @@
             }).catch(() => {});
         }
 
+        function hideUserSuggestions() {
+            userSuggestions.classList.add('hidden');
+            userSuggestions.innerHTML = '';
+        }
+
+        function renderUserSuggestions(items) {
+            if (!Array.isArray(items) || items.length === 0) {
+                hideUserSuggestions();
+                return;
+            }
+
+            userSuggestions.innerHTML = items.map((item) => `
+                <button type="button" class="flex w-full items-center justify-between gap-4 px-4 py-3 text-left transition hover:bg-blue-50" data-username="${item.username}">
+                    <span class="font-semibold text-gray-800">${item.username}</span>
+                    <span class="text-xs font-bold uppercase tracking-wide text-gray-400">${item.role || 'User'}</span>
+                </button>
+            `).join('');
+            userSuggestions.classList.remove('hidden');
+        }
+
+        async function fetchUserSuggestions() {
+            const search = userFilter.value.trim();
+
+            if (search === '') {
+                hideUserSuggestions();
+                return;
+            }
+
+            try {
+                const response = await fetch(`${auditLogUsersUrl}?search=${encodeURIComponent(search)}`, {
+                    headers: { 'Accept': 'application/json' },
+                    credentials: 'same-origin',
+                });
+                const payload = await response.json();
+
+                if (!response.ok) {
+                    throw new Error(payload.message || 'Failed to load users');
+                }
+
+                renderUserSuggestions(payload.data || []);
+            } catch (error) {
+                hideUserSuggestions();
+            }
+        }
+
         function renderLogs(items) {
             if (!Array.isArray(items) || items.length === 0) {
                 logsTableBody.innerHTML = `
@@ -185,7 +234,7 @@
                     <td class="px-5 py-4 text-sm font-semibold text-gray-700">${item.table_name ?? '-'}</td>
                     <td class="px-5 py-4 text-sm text-gray-600">
                         <div class="font-semibold text-gray-800">${item.user?.username ?? 'System'}</div>
-                        <div class="text-xs text-gray-400">ID: ${item.user_id ?? '-'}</div>
+                        <div class="text-xs text-gray-400">${item.user?.role ?? 'No role'}</div>
                     </td>
                     <td class="px-5 py-4 text-sm text-gray-600">${item.description ?? '-'}</td>
                 </tr>
@@ -196,13 +245,13 @@
             setPageMessage('');
             logsTableBody.innerHTML = `
                 <tr>
-                    <td colspan="6" class="px-5 py-8 text-center text-sm font-medium text-gray-400">Loading audit logs...</td>
+                    <td colspan="5" class="px-5 py-8 text-center text-sm font-medium text-gray-400">Loading audit logs...</td>
                 </tr>
             `;
 
             const params = new URLSearchParams({
                 page: String(page),
-                per_page: '20',
+                per_page: '10',
             });
 
             if (actionFilter.value.trim() !== '') {
@@ -214,7 +263,7 @@
             }
 
             if (userFilter.value.trim() !== '') {
-                params.set('user_id', userFilter.value.trim());
+                params.set('username', userFilter.value.trim());
             }
 
             try {
@@ -256,11 +305,8 @@
             }
         }
 
-        document.getElementById('applyFilters').addEventListener('click', () => loadAuditLogs(1));
-        document.getElementById('resetFilters').addEventListener('click', () => {
-            actionFilter.value = '';
-            tableFilter.value = '';
-            userFilter.value = '';
+        document.getElementById('applyFilters').addEventListener('click', () => {
+            hideUserSuggestions();
             loadAuditLogs(1);
         });
         previousPageButton.addEventListener('click', () => {
@@ -271,6 +317,31 @@
         nextPageButton.addEventListener('click', () => {
             if (currentPage < lastPage) {
                 loadAuditLogs(currentPage + 1);
+            }
+        });
+        userFilter.addEventListener('input', () => {
+            window.clearTimeout(userSuggestionTimer);
+            userSuggestionTimer = window.setTimeout(fetchUserSuggestions, 200);
+        });
+        userFilter.addEventListener('focus', fetchUserSuggestions);
+        userFilter.addEventListener('keydown', (event) => {
+            if (event.key === 'Enter') {
+                hideUserSuggestions();
+                loadAuditLogs(1);
+            }
+        });
+        document.addEventListener('click', (event) => {
+            const suggestion = event.target.closest('[data-username]');
+
+            if (suggestion) {
+                userFilter.value = suggestion.dataset.username || '';
+                hideUserSuggestions();
+                loadAuditLogs(1);
+                return;
+            }
+
+            if (!event.target.closest('#userSuggestions') && !event.target.closest('#userFilter')) {
+                hideUserSuggestions();
             }
         });
 

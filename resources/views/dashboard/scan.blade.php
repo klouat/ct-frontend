@@ -270,22 +270,22 @@
         }
 
         function updateUI(data) {
-            if (data.record_type === 'invoice' && data.invoice) {
-                activeInvoiceId = data.invoice.invoice_id || null;
-                document.getElementById('productId').value = data.invoice.product_id || '-';
-                document.getElementById('invoiceId').value = data.invoice.invoice_code || '-';
-                document.getElementById('vendorName').value = data.invoice.vendor_name || '-';
-                document.getElementById('scannedCount').value = `${data.invoice.scanned_box_count || 0} / ${data.invoice.box_quantity || 0}`;
-                document.getElementById('remainingCount').value = `${data.invoice.remaining_box_count || 0}`;
-            } else {
+            if (!data.invoice) {
                 activeInvoiceId = null;
-                document.getElementById('productId').value = data.package.box_code;
-                document.getElementById('invoiceId').value = data.package.invoice_po_number;
-                document.getElementById('vendorName').value = data.package.vendor_name;
+                document.getElementById('productId').value = '-';
+                document.getElementById('invoiceId').value = '-';
+                document.getElementById('vendorName').value = '-';
                 document.getElementById('scannedCount').value = '-';
                 document.getElementById('remainingCount').value = '-';
+                return;
             }
 
+            activeInvoiceId = data.invoice.invoice_id || null;
+            document.getElementById('productId').value = data.invoice.product_id || '-';
+            document.getElementById('invoiceId').value = data.invoice.invoice_code || '-';
+            document.getElementById('vendorName').value = data.invoice.vendor_name || '-';
+            document.getElementById('scannedCount').value = `${data.invoice.scanned_box_count || 0} / ${data.invoice.box_quantity || 0}`;
+            document.getElementById('remainingCount').value = `${data.invoice.remaining_box_count || 0}`;
             setStatusBadge(data.verification.status);
         }
 

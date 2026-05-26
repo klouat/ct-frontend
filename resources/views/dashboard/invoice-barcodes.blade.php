@@ -184,7 +184,6 @@
             logActivity({
                 action: 'PRINT_INVOICE_BARCODE',
                 table_name: 'invoices',
-                record_id: item.invoice_id || null,
                 description: `Printed invoice QR for ${item.invoice_code || '-'}`,
             });
 

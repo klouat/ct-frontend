@@ -23,7 +23,6 @@ class ActivityLogController extends Controller
         $validated = $request->validate([
             'action' => ['required', 'string', 'max:100'],
             'table_name' => ['required', 'string', 'max:100'],
-            'record_id' => ['nullable', 'integer'],
             'description' => ['nullable', 'string', 'max:255'],
         ]);
 

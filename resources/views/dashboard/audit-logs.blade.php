@@ -69,14 +69,13 @@
                                     <th class="px-5 py-4">Time</th>
                                     <th class="px-5 py-4">Action</th>
                                     <th class="px-5 py-4">Table</th>
-                                    <th class="px-5 py-4">Record ID</th>
                                     <th class="px-5 py-4">User</th>
                                     <th class="px-5 py-4">Description</th>
                                 </tr>
                             </thead>
                             <tbody id="logsTableBody" class="divide-y divide-blue-50 bg-white">
                                 <tr>
-                                    <td colspan="6" class="px-5 py-8 text-center text-sm font-medium text-gray-400">Loading audit logs...</td>
+                                    <td colspan="5" class="px-5 py-8 text-center text-sm font-medium text-gray-400">Loading audit logs...</td>
                                 </tr>
                             </tbody>
                         </table>
@@ -169,7 +168,7 @@
             if (!Array.isArray(items) || items.length === 0) {
                 logsTableBody.innerHTML = `
                     <tr>
-                        <td colspan="6" class="px-5 py-8 text-center text-sm font-medium text-gray-400">No audit logs found for the selected filters.</td>
+                        <td colspan="5" class="px-5 py-8 text-center text-sm font-medium text-gray-400">No audit logs found for the selected filters.</td>
                     </tr>
                 `;
                 return;
@@ -184,7 +183,6 @@
                         </span>
                     </td>
                     <td class="px-5 py-4 text-sm font-semibold text-gray-700">${item.table_name ?? '-'}</td>
-                    <td class="px-5 py-4 text-sm font-semibold text-gray-700">${item.record_id ?? '-'}</td>
                     <td class="px-5 py-4 text-sm text-gray-600">
                         <div class="font-semibold text-gray-800">${item.user?.username ?? 'System'}</div>
                         <div class="text-xs text-gray-400">ID: ${item.user_id ?? '-'}</div>

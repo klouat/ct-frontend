@@ -21,6 +21,7 @@ class AuditLogController extends Controller
         }
 
         $query = array_filter([
+            'page' => $request->integer('page') ?: null,
             'username' => trim((string) $request->query('username', '')),
             'action' => trim((string) $request->query('action', '')),
             'table_name' => trim((string) $request->query('table_name', '')),

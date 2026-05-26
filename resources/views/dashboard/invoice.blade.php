@@ -7,7 +7,6 @@
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
-    <script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.6/dist/JsBarcode.all.min.js"></script>
 </head>
 <body class="bg-[#f4faff] flex min-h-screen font-sans text-gray-800">
 
@@ -92,12 +91,6 @@
                     <div class="bg-[#f4f1ff] p-6 border-b border-blue-100">
                         <h3 class="font-bold text-[#001a4d] uppercase tracking-wider">Ringkasan Invoice</h3>
                     </div>
-                    <div class="border-b border-blue-100 bg-[#fcfdff] p-6">
-                        <div class="rounded-2xl border border-dashed border-blue-200 bg-white p-4 text-center">
-                            <svg id="barcodePreview" class="mx-auto"></svg>
-                            <p id="barcodeText" class="mt-3 break-all text-xs font-semibold text-gray-500">Barcode will appear here</p>
-                        </div>
-                    </div>
                     <div class="divide-y divide-blue-100">
                         <div class="p-4 flex justify-between gap-4">
                             <span class="text-gray-500">Vendor</span>
@@ -134,9 +127,6 @@
                 </div>
 
                 <div class="space-y-4">
-                    <button type="button" id="printBarcodeButton" onclick="printBarcode()" class="w-full border-2 border-blue-200 text-[#0033ab] py-4 rounded-xl font-bold text-lg hover:bg-blue-50 transition">
-                        Print Barcode
-                    </button>
                     <button onclick="window.location.reload()" class="w-full bg-[#0033ab] text-white py-4 rounded-xl font-bold text-lg hover:bg-blue-800 transition">Done</button>
                     <button onclick="toggleSection('form')" class="w-full border-2 border-blue-200 text-blue-500 py-4 rounded-xl font-bold text-lg hover:bg-blue-50 transition">Input Other Invoice</button>
                 </div>
@@ -162,7 +152,6 @@
         const form = document.getElementById('invoiceForm');
         const formError = document.getElementById('formError');
         const vendorOptionsUrl = '/vendors/options';
-        let latestBarcodeValue = '';
         let vendorOptions = [];
 
         function buildVendorSelect(selectedValue = '') {
@@ -247,7 +236,6 @@
                 }
 
                 const savedStatus = data.data?.status || 'pending';
-                latestBarcodeValue = data.data?.qr_text || '';
                 document.getElementById('res-vendor').innerText = payload.vendor_name;
                 document.getElementById('res-invoice').innerText = payload.invoice_id;
                 document.getElementById('res-product-name').innerText = payload.product_name;
@@ -255,7 +243,6 @@
                 document.getElementById('res-box-count').innerText = String(payload.box_count);
                 document.getElementById('res-arrival-date').innerText = formatArrivalDate(payload.arrival_date);
                 applyStatusBadge(savedStatus);
-                renderBarcode(latestBarcodeValue || payload.invoice_id);
                 
                 toggleSection('success');
 
@@ -272,7 +259,6 @@
             } else {
                 document.getElementById('formSection').classList.remove('hidden');
                 document.getElementById('successSection').classList.add('hidden');
-                latestBarcodeValue = '';
                 form.reset();
             }
         }
@@ -320,83 +306,6 @@
             }
 
             lucide.createIcons();
-        }
-
-        function renderBarcode(value) {
-            const barcodeText = document.getElementById('barcodeText');
-            const barcodeValue = String(value || '').trim();
-
-            if (!barcodeValue) {
-                barcodeText.textContent = 'Barcode not available';
-                document.getElementById('barcodePreview').innerHTML = '';
-                return;
-            }
-
-            JsBarcode('#barcodePreview', barcodeValue, {
-                format: 'CODE128',
-                lineColor: '#163a8a',
-                width: 2,
-                height: 64,
-                displayValue: false,
-                margin: 8,
-            });
-
-            barcodeText.textContent = barcodeValue;
-        }
-
-        function printBarcode() {
-            if (!latestBarcodeValue) {
-                return;
-            }
-
-            const printWindow = window.open('', '_blank', 'width=600,height=700');
-
-            if (!printWindow) {
-                return;
-            }
-
-            const invoiceId = document.getElementById('res-invoice').innerText;
-            const productName = document.getElementById('res-product-name').innerText;
-            const productId = document.getElementById('res-product-id').innerText;
-
-            printWindow.document.write(`
-                <!DOCTYPE html>
-                <html lang="en">
-                <head>
-                    <meta charset="UTF-8">
-                    <title>Print Barcode</title>
-                    <script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.6/dist/JsBarcode.all.min.js"><\/script>
-                    <style>
-                        body { font-family: Arial, sans-serif; padding: 24px; text-align: center; }
-                        .label { border: 1px solid #dbeafe; border-radius: 16px; padding: 24px; }
-                        .meta { margin-top: 12px; color: #334155; font-size: 14px; }
-                        .value { margin-top: 8px; font-weight: 700; word-break: break-all; }
-                    </style>
-                </head>
-                <body>
-                    <div class="label">
-                        <h2>Invoice Barcode</h2>
-                        <svg id="printBarcodeSvg"></svg>
-                        <div class="meta">Invoice ID: ${invoiceId}</div>
-                        <div class="meta">Product: ${productName}</div>
-                        <div class="meta">Product ID: ${productId}</div>
-                        <div class="value">${latestBarcodeValue}</div>
-                    </div>
-                    <script>
-                        JsBarcode('#printBarcodeSvg', ${JSON.stringify(latestBarcodeValue)}, {
-                            format: 'CODE128',
-                            lineColor: '#163a8a',
-                            width: 2,
-                            height: 90,
-                            displayValue: false,
-                            margin: 10
-                        });
-                        window.onload = () => { window.print(); };
-                    <\/script>
-                </body>
-                </html>
-            `);
-            printWindow.document.close();
         }
 
         hydrateVendorSelects();

@@ -56,36 +56,3 @@ If you discover a security vulnerability within Laravel, please send an e-mail t
 ## License
 
 The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
-
-## Vercel Deployment
-
-This project includes a basic Vercel setup for Laravel using a PHP community runtime.
-
-- `vercel.json` routes requests into `api/index.php`
-- `api/index.php` boots Laravel through `public/index.php`
-- When `VERCEL` is present, the app defaults to safer serverless settings:
-- Sessions use `cookie`
-- Cache uses `array`
-- Queue uses `sync`
-- Logs go to `stderr`
-- Compiled Blade views use `/tmp/storage/framework/views`
-
-Set these environment variables in Vercel:
-
-- `APP_ENV=production`
-- `APP_KEY=...`
-- `APP_URL=https://your-project.vercel.app`
-- `SVS_API_URL=https://ct.stagnant.my.id/`
-
-Optional overrides if needed:
-
-- `LOG_CHANNEL=stderr`
-- `SESSION_DRIVER=cookie`
-- `CACHE_STORE=array`
-- `QUEUE_CONNECTION=sync`
-- `VIEW_COMPILED_PATH=/tmp/storage/framework/views`
-
-Notes:
-
-- This setup uses `vercel-php@0.7.4`, a community runtime.
-- If your session payload grows too large for cookie sessions, switch to an external database or Redis-backed session store.

@@ -31,6 +31,14 @@ class HistoryController extends Controller
                 ->timeout(20)
                 ->withToken($token)
                 ->get($this->apiUrl('/api/history'), $query);
+
+            $this->logActivity($token, [
+                'action' => 'VIEW_HISTORY_DATA',
+                'table_name' => 'history',
+                'description' => $query !== []
+                    ? 'Viewed history data with filters applied'
+                    : 'Viewed history data',
+            ]);
         } catch (ConnectionException) {
             return response()->json([
                 'message' => 'Could not reach the SVS API at port 8000.',
@@ -59,6 +67,19 @@ class HistoryController extends Controller
     private function apiUrl(string $path): string
     {
         return rtrim((string) config('services.svs.base_url'), '/').$path;
+    }
+
+    private function logActivity(string $token, array $payload): void
+    {
+        try {
+            Http::acceptJson()
+                ->withoutVerifying()
+                ->timeout(10)
+                ->withToken($token)
+                ->post($this->apiUrl('/api/audit-logs/activity'), $payload);
+        } catch (\Throwable) {
+            // Ignore audit logging failures for read operations.
+        }
     }
 
     private function extractMessage(mixed $payload, string $fallback): string

@@ -7,6 +7,7 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
     <script src="https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.js" defer></script>
+    <script src="https://unpkg.com/@zxing/library@0.21.3/umd/index.min.js" defer></script>
     <style>
         #cameraPreview {
             position: absolute;
@@ -56,7 +57,7 @@
                     <div class="absolute inset-0 z-10 bg-gradient-to-b from-black/55 via-black/10 to-black/45"></div>
 
                     <div class="relative z-20 flex w-full flex-col items-center px-4">
-                        <p class="mb-6 rounded-full bg-black/30 px-3 py-1 text-center text-xs font-bold uppercase tracking-[0.2em] text-white backdrop-blur-sm sm:mb-8 sm:px-4 sm:text-sm md:text-base">Use your camera to detect QR code</p>
+                        <p class="mb-6 rounded-full bg-black/30 px-3 py-1 text-center text-xs font-bold uppercase tracking-[0.2em] text-white backdrop-blur-sm sm:mb-8 sm:px-4 sm:text-sm md:text-base">Use your camera to detect barcode or QR code</p>
                         <div class="relative h-28 w-44 border-4 border-transparent sm:h-32 sm:w-48 md:h-40 md:w-64">
                             <div class="absolute left-0 top-0 h-8 w-8 border-l-4 border-t-4 border-blue-500"></div>
                             <div class="absolute right-0 top-0 h-8 w-8 border-r-4 border-t-4 border-blue-500"></div>
@@ -81,12 +82,26 @@
                 </div>
             </div>
 
-            <!-- Right Side: Details Card -->
-            <div class="w-full min-w-0 rounded-[2rem] border border-gray-50 bg-white p-5 shadow-xl sm:p-8 xl:w-1/2">
+            <div class="flex w-full min-w-0 items-center justify-center rounded-[2rem] border border-dashed border-blue-100 bg-white/70 p-8 text-center shadow-sm xl:w-1/2">
+                <div class="max-w-md">
+                    <div class="mx-auto mb-5 flex h-20 w-20 items-center justify-center rounded-full bg-blue-50 text-[#0033ab]">
+                        <i data-lucide="scan-search" class="h-10 w-10"></i>
+                    </div>
+                    <h2 class="text-3xl font-black tracking-tight text-gray-800 sm:text-4xl">Ready to Verify</h2>
+                    <p id="systemStatus" class="mt-3 text-base font-bold text-gray-400 sm:text-lg">
+                        Scan an invoice QR code to open the verification popup.
+                    </p>
+                </div>
+            </div>
+        </main>
+
+        <div id="verificationModal" class="fixed inset-0 z-50 hidden items-end justify-center bg-slate-950/60 px-0 pt-10 backdrop-blur-sm sm:items-center sm:px-4 sm:py-6">
+            <div class="max-h-[70vh] w-full overflow-y-auto rounded-t-[2rem] border border-gray-100 bg-white p-5 shadow-2xl sm:max-h-[85vh] sm:max-w-3xl sm:rounded-[2rem] sm:p-8">
+                <div class="mx-auto mb-4 h-1.5 w-20 rounded-full bg-gray-200 sm:hidden"></div>
                 <div class="mb-6 flex flex-col gap-4 sm:mb-8 sm:flex-row sm:items-center sm:justify-between">
                     <div class="min-w-0">
                         <h2 class="text-3xl font-black tracking-tight text-gray-800 sm:text-4xl">Verification</h2>
-                        <p id="systemStatus" class="mt-1 font-bold text-gray-400">Record Detail</p>
+                        <p class="mt-1 font-bold text-gray-400">Record Detail</p>
                     </div>
                     <div id="matchBadge" class="flex w-full items-center justify-center gap-2 rounded-full border-2 border-gray-300 bg-gray-50 px-5 py-2 text-sm font-black uppercase tracking-wider text-gray-600 sm:w-auto sm:justify-start sm:px-6">
                         <i id="statusIcon" data-lucide="check-circle" class="w-5 h-5"></i>
@@ -94,48 +109,47 @@
                     </div>
                 </div>
 
-                <!-- Fields -->
                 <div class="mb-8 space-y-4 sm:mb-10">
                     <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
-                        <div class="group rounded-2xl border border-blue-50 bg-[#f8faff] p-4 transition-all hover:shadow-md sm:p-5">
-                            <label class="text-gray-400 text-[10px] font-black uppercase tracking-widest mb-2 block">Product ID</label>
-                            <input type="text" id="productId" value="PD-0123" 
-                                class="w-full border-b-2 border-transparent bg-transparent text-lg font-black text-gray-800 transition-all focus:border-blue-400 focus:outline-none sm:text-xl md:text-2xl">
+                        <div class="rounded-2xl border border-blue-50 bg-[#f8faff] p-4 sm:p-5">
+                            <label class="mb-2 block text-[10px] font-black uppercase tracking-widest text-gray-400">Product ID</label>
+                            <input type="text" id="productId" value="-" readonly
+                                class="w-full bg-transparent text-lg font-black text-gray-800 focus:outline-none sm:text-xl md:text-2xl">
                         </div>
-                        <div class="group rounded-2xl border border-blue-50 bg-[#f8faff] p-4 transition-all hover:shadow-md sm:p-5">
-                            <label class="text-gray-400 text-[10px] font-black uppercase tracking-widest mb-2 block">Invoice ID</label>
-                            <input type="text" id="invoiceId" value="INV-455" 
-                                class="w-full border-b-2 border-transparent bg-transparent text-lg font-black text-gray-800 transition-all focus:border-blue-400 focus:outline-none sm:text-xl md:text-2xl">
+                        <div class="rounded-2xl border border-blue-50 bg-[#f8faff] p-4 sm:p-5">
+                            <label class="mb-2 block text-[10px] font-black uppercase tracking-widest text-gray-400">Invoice ID</label>
+                            <input type="text" id="invoiceId" value="-" readonly
+                                class="w-full bg-transparent text-lg font-black text-gray-800 focus:outline-none sm:text-xl md:text-2xl">
                         </div>
                     </div>
 
-                    <div class="group flex flex-col gap-4 rounded-2xl border border-blue-50 bg-[#f8faff] p-4 transition-all hover:shadow-md sm:flex-row sm:items-center sm:justify-between sm:p-5">
+                    <div class="flex flex-col gap-4 rounded-2xl border border-blue-50 bg-[#f8faff] p-4 sm:flex-row sm:items-center sm:justify-between sm:p-5">
                         <div class="min-w-0 flex-grow">
-                            <label class="text-gray-400 text-[10px] font-black uppercase tracking-widest mb-2 block">Vendor Name</label>
-                            <input type="text" id="vendorName" value="Vendor A" 
-                                class="w-full border-b-2 border-transparent bg-transparent text-xl font-black text-gray-800 transition-all focus:border-blue-400 focus:outline-none sm:text-2xl">
+                            <label class="mb-2 block text-[10px] font-black uppercase tracking-widest text-gray-400">Vendor Name</label>
+                            <input type="text" id="vendorName" value="-" readonly
+                                class="w-full bg-transparent text-xl font-black text-gray-800 focus:outline-none sm:text-2xl">
                         </div>
                         <div class="flex h-14 w-14 shrink-0 items-center justify-center self-start rounded-2xl bg-blue-600 text-white shadow-lg shadow-blue-100 sm:self-auto">
-                            <i data-lucide="truck" class="w-7 h-7"></i>
+                            <i data-lucide="truck" class="h-7 w-7"></i>
                         </div>
                     </div>
+
                     <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
-                        <div class="group rounded-2xl border border-blue-50 bg-[#f8faff] p-4 transition-all hover:shadow-md sm:p-5">
-                            <label class="text-gray-400 text-[10px] font-black uppercase tracking-widest mb-2 block">Scanned Boxes</label>
-                            <input type="text" id="scannedCount" value="0 / 0"
-                                class="w-full border-b-2 border-transparent bg-transparent text-lg font-black text-gray-800 transition-all focus:border-blue-400 focus:outline-none sm:text-xl md:text-2xl">
+                        <div class="rounded-2xl border border-blue-50 bg-[#f8faff] p-4 sm:p-5">
+                            <label class="mb-2 block text-[10px] font-black uppercase tracking-widest text-gray-400">Scanned Boxes</label>
+                            <input type="text" id="scannedCount" value="0 / 0" readonly
+                                class="w-full bg-transparent text-lg font-black text-gray-800 focus:outline-none sm:text-xl md:text-2xl">
                         </div>
-                        <div class="group rounded-2xl border border-blue-50 bg-[#f8faff] p-4 transition-all hover:shadow-md sm:p-5">
-                            <label class="text-gray-400 text-[10px] font-black uppercase tracking-widest mb-2 block">Remaining</label>
-                            <input type="text" id="remainingCount" value="0"
-                                class="w-full border-b-2 border-transparent bg-transparent text-lg font-black text-gray-800 transition-all focus:border-blue-400 focus:outline-none sm:text-xl md:text-2xl">
+                        <div class="rounded-2xl border border-blue-50 bg-[#f8faff] p-4 sm:p-5">
+                            <label class="mb-2 block text-[10px] font-black uppercase tracking-widest text-gray-400">Remaining</label>
+                            <input type="text" id="remainingCount" value="0" readonly
+                                class="w-full bg-transparent text-lg font-black text-gray-800 focus:outline-none sm:text-xl md:text-2xl">
                         </div>
                     </div>
                 </div>
 
-                <!-- Buttons -->
                 <div class="grid gap-4">
-                    <button id="confirmBtn" onclick="handleConfirm()" 
+                    <button id="confirmBtn" onclick="handleConfirm()"
                         class="w-full rounded-[1.25rem] bg-[#0033ab] py-4 text-lg font-black text-white shadow-xl shadow-blue-100 transition hover:bg-blue-800 active:scale-[0.98] sm:py-5 sm:text-xl">
                         Confirm Data
                     </button>
@@ -149,7 +163,7 @@
                     </div>
                 </div>
             </div>
-        </main>
+        </div>
 
         <!-- Dynamic Footer -->
         <footer class="mt-auto bg-[#001a4d] text-white p-6 text-[10px] md:text-xs">
@@ -167,17 +181,35 @@
         lucide.createIcons();
 
         const SCAN_API = "/scan/data";
+        const ACTIVITY_LOG_URL = "/activity-log";
         const cameraStatus = document.getElementById('cameraStatus');
         const cameraVideo = document.getElementById('cameraVideo');
+        const verificationModal = document.getElementById('verificationModal');
         const csrfToken = '{{ csrf_token() }}';
         let isHandlingScan = false;
+        let isVerificationModalOpen = false;
         let lastScannedText = '';
         let lastScanAt = 0;
         let mediaStream = null;
         let detectorInterval = null;
+        let barcodeDetector = null;
+        let zxingReader = null;
         let activeInvoiceId = null;
         const scanCanvas = document.createElement('canvas');
         const scanContext = scanCanvas.getContext('2d', { willReadFrequently: true });
+
+        function logActivity(payload) {
+            fetch(ACTIVITY_LOG_URL, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json',
+                    'X-CSRF-TOKEN': csrfToken
+                },
+                credentials: 'same-origin',
+                body: JSON.stringify(payload)
+            }).catch(() => {});
+        }
 
         function handleManualInput() {
             const val = document.getElementById('manualInput').value.trim();
@@ -191,7 +223,7 @@
             const normalizedText = scannedText.trim();
             const now = Date.now();
 
-            if (!normalizedText || isHandlingScan) {
+            if (!normalizedText || isHandlingScan || isVerificationModalOpen) {
                 return;
             }
 
@@ -221,8 +253,9 @@
 
                 if (response.ok) {
                     updateUI(result.data);
-                    document.getElementById('systemStatus').textContent = "Record found";
-                    setCameraStatus("QR detected successfully");
+                    document.getElementById('systemStatus').textContent = "Record found. Review the popup to continue.";
+                    setCameraStatus("QR detected successfully. Confirm the popup to scan again.");
+                    openVerificationModal();
                 } else {
                     document.getElementById('systemStatus').textContent = result.message || "Record not found";
                     setCameraStatus("QR detected, but record was not found");
@@ -257,12 +290,9 @@
         }
 
         function handleConfirm() {
-            const finalData = {
-                product: document.getElementById('productId').value,
-                invoice: document.getElementById('invoiceId').value,
-                vendor: document.getElementById('vendorName').value
-            };
-            alert("Confirmed: " + finalData.invoice);
+            closeVerificationModal();
+            document.getElementById('systemStatus').textContent = "Verification confirmed. Ready for the next scan.";
+            setCameraStatus("Camera is active. Point it at a barcode or QR code");
         }
 
         async function markPending() {
@@ -304,9 +334,23 @@
                 document.getElementById('remainingCount').value = `${Math.max((data.target_box_count || 0) - (data.scanned_box_count || 0), 0)}`;
                 setStatusBadge(data.status || 'pending');
                 document.getElementById('systemStatus').textContent = result.message || 'Status updated';
+                closeVerificationModal();
+                setCameraStatus("Camera is active. Point it at a barcode or QR code");
             } catch (error) {
                 alert(error.message || 'Failed to update invoice status');
             }
+        }
+
+        function openVerificationModal() {
+            isVerificationModalOpen = true;
+            verificationModal.classList.remove('hidden');
+            verificationModal.classList.add('flex');
+        }
+
+        function closeVerificationModal() {
+            isVerificationModalOpen = false;
+            verificationModal.classList.add('hidden');
+            verificationModal.classList.remove('flex');
         }
 
         function setStatusBadge(status) {
@@ -339,8 +383,34 @@
 
         async function startCameraScanner() {
             try {
-                if (typeof window.jsQR !== 'function') {
-                    setCameraStatus("QR scanner failed to load");
+                if ('BarcodeDetector' in window) {
+                    const supportedFormats = await window.BarcodeDetector.getSupportedFormats();
+                    const preferredFormats = ['code_128', 'qr_code', 'ean_13', 'ean_8', 'upc_a', 'upc_e'];
+                    const formats = preferredFormats.filter((format) => supportedFormats.includes(format));
+
+                    if (formats.length > 0) {
+                        barcodeDetector = new window.BarcodeDetector({ formats });
+                    }
+                }
+
+                if (window.ZXing?.MultiFormatReader) {
+                    const hints = new Map();
+                    hints.set(window.ZXing.DecodeHintType.POSSIBLE_FORMATS, [
+                        window.ZXing.BarcodeFormat.CODE_128,
+                        window.ZXing.BarcodeFormat.QR_CODE,
+                        window.ZXing.BarcodeFormat.EAN_13,
+                        window.ZXing.BarcodeFormat.EAN_8,
+                        window.ZXing.BarcodeFormat.UPC_A,
+                        window.ZXing.BarcodeFormat.UPC_E,
+                    ]);
+                    hints.set(window.ZXing.DecodeHintType.TRY_HARDER, true);
+
+                    zxingReader = new window.ZXing.MultiFormatReader();
+                    zxingReader.setHints(hints);
+                }
+
+                if (!barcodeDetector && !zxingReader && typeof window.jsQR !== 'function') {
+                    setCameraStatus("Barcode scanner failed to load");
                     return;
                 }
                 mediaStream = await navigator.mediaDevices.getUserMedia({
@@ -352,7 +422,7 @@
 
                 cameraVideo.srcObject = mediaStream;
                 await cameraVideo.play();
-                setCameraStatus("Camera is active. Point it at a QR code");
+                setCameraStatus("Camera is active. Point it at a barcode or QR code");
                 startDetectionLoop();
             } catch (error) {
                 console.error("Camera Error:", error);
@@ -364,7 +434,7 @@
             stopDetectionLoop();
 
             detectorInterval = window.setInterval(async () => {
-                if (!scanContext || !cameraVideo || cameraVideo.readyState < 2 || isHandlingScan) {
+                if (!scanContext || !cameraVideo || cameraVideo.readyState < 2 || isHandlingScan || isVerificationModalOpen) {
                     return;
                 }
 
@@ -380,13 +450,49 @@
                     scanCanvas.height = height;
                     scanContext.drawImage(cameraVideo, 0, 0, width, height);
 
-                    const imageData = scanContext.getImageData(0, 0, width, height);
-                    const qrCode = window.jsQR(imageData.data, width, height, {
-                        inversionAttempts: 'dontInvert'
-                    });
+                    if (barcodeDetector) {
+                        const barcodes = await barcodeDetector.detect(scanCanvas);
 
-                    if (qrCode?.data) {
-                        handleScan(qrCode.data);
+                        if (barcodes.length > 0) {
+                            const rawValue = barcodes[0]?.rawValue?.trim();
+
+                            if (rawValue) {
+                                handleScan(rawValue);
+                                return;
+                            }
+                        }
+                    }
+
+                    if (zxingReader) {
+                        const imageData = scanContext.getImageData(0, 0, width, height);
+                        const luminanceSource = new window.ZXing.RGBLuminanceSource(imageData.data, width, height);
+                        const binaryBitmap = new window.ZXing.BinaryBitmap(
+                            new window.ZXing.HybridBinarizer(luminanceSource)
+                        );
+
+                        try {
+                            const result = zxingReader.decode(binaryBitmap);
+                            const rawValue = result?.getText?.()?.trim();
+
+                            if (rawValue) {
+                                handleScan(rawValue);
+                                zxingReader.reset();
+                                return;
+                            }
+                        } catch (decodeError) {
+                            // No barcode found in this frame.
+                        }
+                    }
+
+                    if (typeof window.jsQR === 'function') {
+                        const imageData = scanContext.getImageData(0, 0, width, height);
+                        const qrCode = window.jsQR(imageData.data, width, height, {
+                            inversionAttempts: 'dontInvert'
+                        });
+
+                        if (qrCode?.data) {
+                            handleScan(qrCode.data);
+                        }
                     }
                 } catch (error) {
                     console.error("Detection Error:", error);
@@ -405,7 +511,14 @@
             if (e.key === 'Enter') handleManualInput();
         });
 
-        window.addEventListener('load', startCameraScanner);
+        window.addEventListener('load', () => {
+            logActivity({
+                action: 'VIEW_SCAN_PAGE',
+                table_name: 'pages',
+                description: 'Opened scan page',
+            });
+            startCameraScanner();
+        });
         window.addEventListener('beforeunload', () => {
             stopDetectionLoop();
 

@@ -70,6 +70,7 @@
         lucide.createIcons();
 
         const HISTORY_API = "/history/data";
+        const ACTIVITY_LOG_URL = "/activity-log";
         const historyList = document.getElementById('historyList');
         const historyMessage = document.getElementById('historyMessage');
         const searchInput = document.getElementById('searchInput');
@@ -97,6 +98,19 @@
                     <div class="h-32 bg-gray-200 rounded-2xl w-full"></div>
                 </div>
             `;
+        }
+
+        function logActivity(payload) {
+            fetch(ACTIVITY_LOG_URL, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json',
+                    'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                },
+                credentials: 'same-origin',
+                body: JSON.stringify(payload)
+            }).catch(() => {});
         }
 
         async function fetchHistory() {
@@ -239,6 +253,11 @@
         });
 
         // Initialize
+        logActivity({
+            action: 'VIEW_HISTORY_PAGE',
+            table_name: 'pages',
+            description: 'Opened history page',
+        });
         fetchHistory();
     </script>
 </body>

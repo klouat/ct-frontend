@@ -7,9 +7,9 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Http;
 
-class InvoiceBarcodeController extends Controller
+class ActivityLogController extends Controller
 {
-    public function index(Request $request): JsonResponse
+    public function store(Request $request): JsonResponse
     {
         $auth = $request->session()->get('svs_auth');
         $token = data_get($auth, 'access_token');
@@ -20,22 +20,19 @@ class InvoiceBarcodeController extends Controller
             ], 401);
         }
 
-        $query = array_filter([
-            'per_page' => $request->integer('per_page', 100),
-        ], fn (mixed $value): bool => $value !== '' && $value !== null);
+        $validated = $request->validate([
+            'action' => ['required', 'string', 'max:100'],
+            'table_name' => ['required', 'string', 'max:100'],
+            'record_id' => ['nullable', 'integer'],
+            'description' => ['nullable', 'string', 'max:255'],
+        ]);
 
         try {
             $response = Http::acceptJson()
                 ->withoutVerifying()
-                ->timeout(20)
+                ->timeout(15)
                 ->withToken($token)
-                ->get($this->apiUrl('/api/invoices'), $query);
-
-            $this->logActivity($token, [
-                'action' => 'VIEW_INVOICE_BARCODE_DATA',
-                'table_name' => 'invoices',
-                'description' => 'Viewed invoice barcode list',
-            ]);
+                ->post($this->apiUrl('/api/audit-logs/activity'), $validated);
         } catch (ConnectionException) {
             return response()->json([
                 'message' => 'Could not reach the SVS API at port 8000.',
@@ -48,35 +45,16 @@ class InvoiceBarcodeController extends Controller
             $request->session()->forget('svs_auth');
         }
 
-        if (! $response->successful()) {
-            return response()->json([
-                'message' => $this->extractMessage($body, 'Failed to load invoices'),
-                'errors' => $body['errors'] ?? null,
-            ], $response->status());
-        }
-
         return response()->json([
-            'message' => $this->extractMessage($body, 'Invoices loaded successfully'),
+            'message' => $this->extractMessage($body, $response->successful() ? 'Activity logged successfully' : 'Failed to log activity'),
             'data' => data_get($body, 'data'),
-        ]);
+            'errors' => $body['errors'] ?? null,
+        ], $response->status());
     }
 
     private function apiUrl(string $path): string
     {
         return rtrim((string) config('services.svs.base_url'), '/').$path;
-    }
-
-    private function logActivity(string $token, array $payload): void
-    {
-        try {
-            Http::acceptJson()
-                ->withoutVerifying()
-                ->timeout(10)
-                ->withToken($token)
-                ->post($this->apiUrl('/api/audit-logs/activity'), $payload);
-        } catch (\Throwable) {
-            // Ignore audit logging failures for read operations.
-        }
     }
 
     private function extractMessage(mixed $payload, string $fallback): string

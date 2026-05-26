@@ -162,6 +162,7 @@
         lucide.createIcons();
 
         const dashboardApiUrl = '/home/data';
+        const activityLogUrl = '/activity-log';
         const vendorOptionsUrl = '/vendors/options';
         const dashboardMessage = document.getElementById('dashboardMessage');
         const dateFilter = document.getElementById('dateFilter');
@@ -205,6 +206,19 @@
         function updateStat(id, count, total) {
             document.getElementById(`stat-${id}`).textContent = `${count} Boxes`;
             document.getElementById(`stat-${id}-rate`).textContent = formatRate(count, total);
+        }
+
+        function logActivity(payload) {
+            fetch(activityLogUrl, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json',
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+                },
+                credentials: 'same-origin',
+                body: JSON.stringify(payload),
+            }).catch(() => {});
         }
 
         const commonOptions = {
@@ -380,6 +394,11 @@
         vendorFilter.addEventListener('change', loadDashboard);
 
         dateFilter.value = getTodayDateString();
+        logActivity({
+            action: 'VIEW_DASHBOARD_PAGE',
+            table_name: 'pages',
+            description: 'Opened dashboard page',
+        });
         loadVendors().then(loadDashboard);
     </script>
 </body>

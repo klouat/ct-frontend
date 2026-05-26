@@ -6,7 +6,7 @@
     <title>EPSON SVS - Print Invoice Barcodes</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
-    <script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.6/dist/JsBarcode.all.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 </head>
 <body class="bg-[#f4faff] flex min-h-screen font-sans text-gray-800">
 
@@ -24,7 +24,7 @@
             <div class="mx-auto max-w-6xl space-y-6">
                 <div class="flex flex-col gap-2">
                     <h2 class="text-3xl font-bold text-[#001a4d]">Print Invoice Barcodes</h2>
-                    <p class="text-sm text-gray-500">List of all invoices with barcode previews for printing and testing.</p>
+                    <p class="text-sm text-gray-500">List of all invoices with QR previews for printing and testing.</p>
                 </div>
 
                 <p id="pageMessage" class="hidden rounded-xl border px-4 py-3 text-sm font-medium"></p>
@@ -53,6 +53,7 @@
         lucide.createIcons();
 
         const DATA_URL = '/invoice-barcodes/data';
+        const ACTIVITY_LOG_URL = '/activity-log';
         const barcodeList = document.getElementById('barcodeList');
         const pageMessage = document.getElementById('pageMessage');
 
@@ -69,6 +70,19 @@
 
             pageMessage.className = `rounded-xl border px-4 py-3 text-sm font-medium ${toneClasses}`;
             pageMessage.textContent = text;
+        }
+
+        function logActivity(payload) {
+            fetch(ACTIVITY_LOG_URL, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json',
+                    'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                },
+                credentials: 'same-origin',
+                body: JSON.stringify(payload)
+            }).catch(() => {});
         }
 
         async function loadInvoices() {
@@ -125,12 +139,12 @@
                                 </div>
                             </div>
                             <button type="button" onclick="printBarcode(${index})" class="shrink-0 rounded-xl border border-blue-200 px-5 py-3 text-sm font-bold text-[#0033ab] transition hover:bg-blue-50">
-                                Print Barcode
+                                Print QR
                             </button>
                         </div>
 
                         <div class="mt-6 rounded-[2rem] border border-dashed border-blue-200 bg-[#fcfdff] p-6">
-                            <svg id="barcode-${index}" class="mx-auto w-full max-w-[780px]"></svg>
+                            <div id="barcode-${index}" class="mx-auto flex justify-center"></div>
                             <p class="mt-4 break-all text-center text-sm font-semibold text-gray-500">${qrText}</p>
                         </div>
                     </div>
@@ -140,13 +154,13 @@
             window.invoiceBarcodeItems = items;
 
             items.forEach((item, index) => {
-                JsBarcode(`#barcode-${index}`, item.qr_text || item.invoice_code || '', {
-                    format: 'CODE128',
-                    lineColor: '#173f9b',
-                    width: 2,
-                    height: 78,
-                    displayValue: false,
-                    margin: 10,
+                new QRCode(document.getElementById(`barcode-${index}`), {
+                    text: item.qr_text || item.invoice_code || '',
+                    width: 220,
+                    height: 220,
+                    colorDark: '#173f9b',
+                    colorLight: '#ffffff',
+                    correctLevel: QRCode.CorrectLevel.M,
                 });
             });
 
@@ -167,6 +181,13 @@
                 return;
             }
 
+            logActivity({
+                action: 'PRINT_INVOICE_BARCODE',
+                table_name: 'invoices',
+                record_id: item.invoice_id || null,
+                description: `Printed invoice QR for ${item.invoice_code || '-'}`,
+            });
+
             const vendorName = item.vendor?.vendor_name || 'Unknown Vendor';
             const barcodeValue = item.qr_text || item.invoice_code || '';
 
@@ -175,8 +196,8 @@
                 <html lang="en">
                 <head>
                     <meta charset="UTF-8">
-                    <title>Print Invoice Barcode</title>
-                    <script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.6/dist/JsBarcode.all.min.js"><\/script>
+                    <title>Print Invoice QR</title>
+                    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"><\/script>
                     <style>
                         body { font-family: Arial, sans-serif; padding: 24px; color: #1f2937; }
                         .sheet { border: 1px dashed #bfdbfe; border-radius: 24px; padding: 28px; }
@@ -192,17 +213,17 @@
                         <div class="meta">Product ID: ${item.product_id || '-'}</div>
                         <div class="meta">Vendor: ${vendorName}</div>
                         <div class="meta">Total Box: ${item.target_box_count || 0}</div>
-                        <svg id="printBarcodeSvg"></svg>
+                        <div id="printQrCode"></div>
                         <div class="value">${barcodeValue}</div>
                     </div>
                     <script>
-                        JsBarcode('#printBarcodeSvg', ${JSON.stringify(barcodeValue)}, {
-                            format: 'CODE128',
-                            lineColor: '#173f9b',
-                            width: 2,
-                            height: 96,
-                            displayValue: false,
-                            margin: 12
+                        new QRCode(document.getElementById('printQrCode'), {
+                            text: ${JSON.stringify(barcodeValue)},
+                            width: 280,
+                            height: 280,
+                            colorDark: '#173f9b',
+                            colorLight: '#ffffff',
+                            correctLevel: QRCode.CorrectLevel.M
                         });
                         window.onload = () => window.print();
                     <\/script>
@@ -212,6 +233,11 @@
             printWindow.document.close();
         }
 
+        logActivity({
+            action: 'VIEW_INVOICE_BARCODE_PAGE',
+            table_name: 'pages',
+            description: 'Opened print invoice barcodes page',
+        });
         loadInvoices();
     </script>
 </body>

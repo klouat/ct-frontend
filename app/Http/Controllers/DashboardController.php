@@ -37,7 +37,16 @@ class DashboardController extends Controller
         }
 
         try {
-            $boxes = $this->fetchBoxes($token, $selectedVendorId);
+            $records = $this->fetchHistoryRecords($token, $selectedVendorId);
+            $this->logActivity($token, [
+                'action' => 'VIEW_DASHBOARD_DATA',
+                'table_name' => 'dashboard',
+                'description' => sprintf(
+                    'Viewed dashboard data for date %s%s',
+                    $selectedDate,
+                    $selectedVendorId ? ' and vendor '.$selectedVendorId : ''
+                ),
+            ]);
         } catch (RuntimeException $exception) {
             if ($exception->getMessage() === 'UNAUTHORIZED') {
                 $request->session()->forget('svs_auth');
@@ -62,8 +71,6 @@ class DashboardController extends Controller
             'mismatch' => 0,
             'pending' => 0,
             'over' => 0,
-            'done' => 0,
-            'unknown' => 0,
         ];
 
         $vendorBreakdown = [];
@@ -71,26 +78,25 @@ class DashboardController extends Controller
         $targetBoxes = 0;
         $invoiceCount = 0;
         $selectedVendorName = null;
-        $invoiceIds = [];
-        $invoiceTargets = [];
-
-        foreach ($boxes as $box) {
-            $createdAt = (string) ($box['created_at'] ?? '');
-            $boxDate = $createdAt !== ''
-                ? Carbon::parse($createdAt)->toDateString()
+        
+        foreach ($records as $record) {
+            $activityAt = (string) ($record['last_scanned_at'] ?? $record['created_at'] ?? $record['recorded_at'] ?? '');
+            $boxDate = $activityAt !== ''
+                ? Carbon::parse($activityAt)->toDateString()
                 : null;
 
             if ($boxDate !== $selectedDate) {
                 continue;
             }
 
-            $invoiceId = isset($box['invoice_id']) ? (int) $box['invoice_id'] : null;
+            $invoiceId = isset($record['invoice_id']) ? (int) $record['invoice_id'] : null;
 
             if ($invoiceId === null) {
                 continue;
             }
 
-            $vendorName = (string) data_get($box, 'vendor.vendor_name', 'Unknown Vendor');
+            $vendorName = (string) ($record['vendor_name'] ?? 'Unknown Vendor');
+            $boxQuantity = (int) ($record['box_quantity'] ?? $record['quantity'] ?? 0);
 
             if ($selectedVendorId !== null) {
                 $selectedVendorName = $vendorName;
@@ -108,22 +114,24 @@ class DashboardController extends Controller
                 ];
             }
 
-            $status = strtolower((string) ($box['status'] ?? 'unknown'));
-            $normalizedStatus = array_key_exists($status, $statusCounts) ? $status : 'unknown';
+            $recordCounts = $this->extractStatusCounts($record);
 
-            $statusCounts[$normalizedStatus]++;
-            $vendorBreakdown[$vendorName]['total_boxes']++;
-            $totalBoxes++;
-            $invoiceIds[$invoiceId] = true;
-            $invoiceTargets[$invoiceId] = (int) data_get($box, 'invoice.target_box_count', 0);
+            $statusCounts['match'] += $recordCounts['match'];
+            $statusCounts['less'] += $recordCounts['less'];
+            $statusCounts['mismatch'] += $recordCounts['mismatch'];
+            $statusCounts['pending'] += $recordCounts['pending'];
+            $statusCounts['over'] += $recordCounts['over'];
+            $vendorBreakdown[$vendorName]['total_boxes'] += $boxQuantity;
+            $totalBoxes += $boxQuantity;
+            $targetBoxes += $boxQuantity;
+            $invoiceCount++;
 
-            if (isset($vendorBreakdown[$vendorName][$normalizedStatus])) {
-                $vendorBreakdown[$vendorName][$normalizedStatus]++;
-            }
+            $vendorBreakdown[$vendorName]['match'] += $recordCounts['match'];
+            $vendorBreakdown[$vendorName]['less'] += $recordCounts['less'];
+            $vendorBreakdown[$vendorName]['mismatch'] += $recordCounts['mismatch'];
+            $vendorBreakdown[$vendorName]['pending'] += $recordCounts['pending'];
+            $vendorBreakdown[$vendorName]['over'] += $recordCounts['over'];
         }
-
-        $invoiceCount = count($invoiceIds);
-        $targetBoxes = array_sum($invoiceTargets);
 
         return response()->json([
             'message' => 'Dashboard data loaded successfully',
@@ -143,7 +151,7 @@ class DashboardController extends Controller
     /**
      * @return array<int, array<string, mixed>>
      */
-    private function fetchBoxes(string $token, ?int $vendorId): array
+    private function fetchHistoryRecords(string $token, ?int $vendorId): array
     {
         $items = [];
         $page = 1;
@@ -154,7 +162,7 @@ class DashboardController extends Controller
                 ->withoutVerifying()
                 ->timeout(20)
                 ->withToken($token)
-                ->get($this->apiUrl('/api/boxes'), array_filter([
+                ->get($this->apiUrl('/api/history'), array_filter([
                     'per_page' => 100,
                     'page' => $page,
                     'vendor_id' => $vendorId,
@@ -165,7 +173,7 @@ class DashboardController extends Controller
             }
 
             if (! $response->successful()) {
-                throw new RuntimeException('FAILED_TO_LOAD_BOXES');
+                throw new RuntimeException('FAILED_TO_LOAD_HISTORY');
             }
 
             $body = $response->json();
@@ -178,8 +186,48 @@ class DashboardController extends Controller
         return $items;
     }
 
+    private function extractStatusCounts(array $record): array
+    {
+        $counts = [
+            'match' => max((int) ($record['match_box_count'] ?? 0), 0),
+            'less' => max((int) ($record['less_box_count'] ?? 0), 0),
+            'mismatch' => max((int) ($record['mismatch_box_count'] ?? 0), 0),
+            'pending' => max((int) ($record['pending_box_count'] ?? 0), 0),
+            'over' => max((int) ($record['over_box_count'] ?? 0), 0),
+        ];
+
+        if (array_sum($counts) > 0) {
+            return $counts;
+        }
+
+        $boxQuantity = max((int) ($record['box_quantity'] ?? $record['quantity'] ?? 0), 0);
+        $status = strtolower(trim((string) ($record['status'] ?? '')));
+
+        return match ($status) {
+            'less' => ['match' => 0, 'less' => $boxQuantity, 'mismatch' => 0, 'pending' => 0, 'over' => 0],
+            'match', 'done', 'terverifikasi' => ['match' => $boxQuantity, 'less' => 0, 'mismatch' => 0, 'pending' => 0, 'over' => 0],
+            'mismatch' => ['match' => 0, 'less' => 0, 'mismatch' => $boxQuantity, 'pending' => 0, 'over' => 0],
+            'over' => ['match' => 0, 'less' => 0, 'mismatch' => 0, 'pending' => 0, 'over' => $boxQuantity],
+            'pending', 'not_scanned', 'on_progress' => ['match' => 0, 'less' => 0, 'mismatch' => 0, 'pending' => $boxQuantity, 'over' => 0],
+            default => ['match' => 0, 'less' => 0, 'mismatch' => 0, 'pending' => 0, 'over' => 0],
+        };
+    }
+
     private function apiUrl(string $path): string
     {
         return rtrim((string) config('services.svs.base_url'), '/').$path;
+    }
+
+    private function logActivity(string $token, array $payload): void
+    {
+        try {
+            Http::acceptJson()
+                ->withoutVerifying()
+                ->timeout(10)
+                ->withToken($token)
+                ->post($this->apiUrl('/api/audit-logs/activity'), $payload);
+        } catch (\Throwable) {
+            // Ignore audit logging failures for read operations.
+        }
     }
 }

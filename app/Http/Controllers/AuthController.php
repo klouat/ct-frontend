@@ -38,7 +38,7 @@ class AuthController extends Controller
 
         return response()->json([
             'message' => $this->extractMessage($payload, 'Login successful'),
-            'redirect' => url('/invoice'),
+            'redirect' => url('/home'),
             'user' => data_get($payload, 'data.user'),
         ]);
     }

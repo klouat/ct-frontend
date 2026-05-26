@@ -1,6 +1,8 @@
 <?php
 
+use App\Http\Controllers\ActivityLogController;
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\AuditLogController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\HistoryController;
 use App\Http\Controllers\InvoiceBarcodeController;
@@ -10,7 +12,11 @@ use App\Http\Controllers\VendorController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
-    return view('welcome');
+    if (session()->has('svs_auth.access_token')) {
+        return redirect('/home');
+    }
+
+    return redirect('/login');
 });
 
 Route::get('/login', function () {
@@ -26,6 +32,7 @@ Route::get('/register', function () {
 Route::post('/register', [AuthController::class, 'register']);
 
 Route::post('/logout', [AuthController::class, 'logout'])->middleware('frontend.auth');
+Route::post('/activity-log', [ActivityLogController::class, 'store'])->middleware('frontend.auth');
 
 Route::get('/home', function () {
     return view('dashboard.home');
@@ -56,3 +63,7 @@ Route::get('/history', function () {
 })->middleware('frontend.auth');
 
 Route::get('/history/data', [HistoryController::class, 'index'])->middleware('frontend.auth');
+Route::get('/audit-logs', function () {
+    return view('dashboard.audit-logs');
+})->middleware('frontend.auth:ADMIN');
+Route::get('/audit-logs/data', [AuditLogController::class, 'index'])->middleware('frontend.auth:ADMIN');

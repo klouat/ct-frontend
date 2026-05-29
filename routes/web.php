@@ -13,7 +13,11 @@ use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
     if (session()->has('svs_auth.access_token')) {
-        return redirect('/home');
+        return redirect(match ((string) session('svs_auth.user.role', '')) {
+            'PETUGAS_GUDANG' => '/scan',
+            'ADMIN', 'SUPERVISOR' => '/home',
+            default => '/login',
+        });
     }
 
     return redirect('/login');
@@ -36,35 +40,35 @@ Route::post('/activity-log', [ActivityLogController::class, 'store'])->middlewar
 
 Route::get('/home', function () {
     return view('dashboard.home');
-})->middleware('frontend.auth');
+})->middleware('frontend.auth:ADMIN,SUPERVISOR');
 
-Route::get('/home/data', [DashboardController::class, 'index'])->middleware('frontend.auth');
+Route::get('/home/data', [DashboardController::class, 'index'])->middleware('frontend.auth:ADMIN,SUPERVISOR');
 
 Route::get('/scan', function () {
     return view('dashboard.scan');
-})->middleware('frontend.auth');
-Route::post('/scan/data', [ScanController::class, 'scan'])->middleware('frontend.auth');
-Route::post('/scan/invoices/{invoice}/pending', [ScanController::class, 'markPending'])->middleware('frontend.auth');
-Route::post('/scan/invoices/{invoice}/complete', [ScanController::class, 'complete'])->middleware('frontend.auth');
+})->middleware('frontend.auth:ADMIN,PETUGAS_GUDANG');
+Route::post('/scan/data', [ScanController::class, 'scan'])->middleware('frontend.auth:ADMIN,PETUGAS_GUDANG');
+Route::post('/scan/invoices/{invoice}/pending', [ScanController::class, 'markPending'])->middleware('frontend.auth:ADMIN,PETUGAS_GUDANG');
+Route::post('/scan/invoices/{invoice}/complete', [ScanController::class, 'complete'])->middleware('frontend.auth:ADMIN,PETUGAS_GUDANG');
 
 Route::get('/invoice', function () {
     return view('dashboard.invoice');
-})->middleware('frontend.auth');
+})->middleware('frontend.auth:ADMIN');
 Route::get('/invoice-barcodes', function () {
     return view('dashboard.invoice-barcodes');
-})->middleware('frontend.auth');
-Route::get('/invoice-barcodes/data', [InvoiceBarcodeController::class, 'index'])->middleware('frontend.auth');
+})->middleware('frontend.auth:ADMIN,PETUGAS_GUDANG');
+Route::get('/invoice-barcodes/data', [InvoiceBarcodeController::class, 'index'])->middleware('frontend.auth:ADMIN,PETUGAS_GUDANG');
 
-Route::post('/invoice', [InvoiceController::class, 'store'])->middleware('frontend.auth');
-Route::get('/vendors/options', [VendorController::class, 'index'])->middleware('frontend.auth');
+Route::post('/invoice', [InvoiceController::class, 'store'])->middleware('frontend.auth:ADMIN');
+Route::get('/vendors/options', [VendorController::class, 'index'])->middleware('frontend.auth:ADMIN');
 
 Route::get('/history', function () {
     return view('dashboard.history');
-})->middleware('frontend.auth');
+})->middleware('frontend.auth:ADMIN');
 
-Route::get('/history/data', [HistoryController::class, 'index'])->middleware('frontend.auth');
+Route::get('/history/data', [HistoryController::class, 'index'])->middleware('frontend.auth:ADMIN');
 Route::get('/audit-logs', function () {
     return view('dashboard.audit-logs');
-})->middleware('frontend.auth:ADMIN');
-Route::get('/audit-logs/data', [AuditLogController::class, 'index'])->middleware('frontend.auth:ADMIN');
-Route::get('/audit-logs/users', [AuditLogController::class, 'searchUsers'])->middleware('frontend.auth:ADMIN');
+})->middleware('frontend.auth:ADMIN,SUPERVISOR');
+Route::get('/audit-logs/data', [AuditLogController::class, 'index'])->middleware('frontend.auth:ADMIN,SUPERVISOR');
+Route::get('/audit-logs/users', [AuditLogController::class, 'searchUsers'])->middleware('frontend.auth:ADMIN,SUPERVISOR');

@@ -13,27 +13,11 @@ class VendorController extends Controller
     {
         $auth = $request->session()->get('svs_auth');
         $token = data_get($auth, 'access_token');
-        $userRole = data_get($auth, 'user.role');
-        $userVendorId = data_get($auth, 'user.vendor_id');
 
         if (! is_string($token) || $token === '') {
             return response()->json([
                 'message' => 'Your session has expired. Please log in again.',
             ], 401);
-        }
-
-        if ($userRole === 'VENDOR') {
-            $vendorName = $this->resolveVendorNameForVendorUser($token, is_numeric($userVendorId) ? (int) $userVendorId : null);
-
-            return response()->json([
-                'message' => 'Vendor options loaded successfully',
-                'data' => [
-                    [
-                        'vendor_id' => $userVendorId,
-                        'vendor_name' => $vendorName,
-                    ],
-                ],
-            ]);
         }
 
         try {
@@ -72,36 +56,6 @@ class VendorController extends Controller
     private function apiUrl(string $path): string
     {
         return rtrim((string) config('services.svs.base_url'), '/').$path;
-    }
-
-    private function resolveVendorNameForVendorUser(string $token, ?int $vendorId): string
-    {
-        if ($vendorId === null) {
-            return 'Assigned Vendor';
-        }
-
-        try {
-            $response = Http::acceptJson()
-                ->withoutVerifying()
-                ->timeout(20)
-                ->withToken($token)
-                ->get($this->apiUrl('/api/boxes'), [
-                    'vendor_id' => $vendorId,
-                    'per_page' => 1,
-                ]);
-
-            if (! $response->successful()) {
-                return 'Vendor ID '.$vendorId;
-            }
-
-            $vendorName = data_get($response->json(), 'data.items.0.vendor.vendor_name');
-
-            return is_string($vendorName) && $vendorName !== ''
-                ? $vendorName
-                : 'Vendor ID '.$vendorId;
-        } catch (ConnectionException) {
-            return 'Vendor ID '.$vendorId;
-        }
     }
 
     private function extractMessage(mixed $payload, string $fallback): string

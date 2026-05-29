@@ -1,14 +1,25 @@
 @php
     $activePage = $activePage ?? '';
+    $userRole = (string) session('svs_auth.user.role', '');
 
-    $navigationItems = [
-        ['key' => 'home', 'label' => 'Dashboard', 'icon' => 'layout-grid', 'href' => '/home'],
-        ['key' => 'scan', 'label' => 'Scanning', 'icon' => 'scan', 'href' => '/scan'],
-        ['key' => 'invoice', 'label' => 'Input Invoice', 'icon' => 'file-text', 'href' => '/invoice'],
-        ['key' => 'invoice-barcodes', 'label' => 'Print Barcodes', 'icon' => 'barcode', 'href' => '/invoice-barcodes'],
-        ['key' => 'history', 'label' => 'History', 'icon' => 'history', 'href' => '/history'],
-        ['key' => 'audit-logs', 'label' => 'Audit Logs', 'icon' => 'scroll-text', 'href' => '/audit-logs'],
-    ];
+    $navigationItems = match ($userRole) {
+        'SUPERVISOR' => [
+            ['key' => 'home', 'label' => 'Dashboard', 'icon' => 'layout-grid', 'href' => '/home'],
+            ['key' => 'audit-logs', 'label' => 'Audit Logs', 'icon' => 'scroll-text', 'href' => '/audit-logs'],
+        ],
+        'PETUGAS_GUDANG' => [
+            ['key' => 'scan', 'label' => 'Scanner', 'icon' => 'scan', 'href' => '/scan'],
+            ['key' => 'invoice-barcodes', 'label' => 'Barcode Preview', 'icon' => 'barcode', 'href' => '/invoice-barcodes'],
+        ],
+        default => [
+            ['key' => 'home', 'label' => 'Dashboard', 'icon' => 'layout-grid', 'href' => '/home'],
+            ['key' => 'scan', 'label' => 'Scanner', 'icon' => 'scan', 'href' => '/scan'],
+            ['key' => 'invoice', 'label' => 'Input Invoice', 'icon' => 'file-text', 'href' => '/invoice'],
+            ['key' => 'invoice-barcodes', 'label' => 'Barcode Preview', 'icon' => 'barcode', 'href' => '/invoice-barcodes'],
+            ['key' => 'history', 'label' => 'History', 'icon' => 'history', 'href' => '/history'],
+            ['key' => 'audit-logs', 'label' => 'Audit Logs', 'icon' => 'scroll-text', 'href' => '/audit-logs'],
+        ],
+    };
 @endphp
 
 <aside class="hidden lg:flex flex-col w-64 bg-white shadow-xl z-20">

@@ -64,26 +64,13 @@
                                 class="w-full pl-10 pr-10 py-2.5 bg-[#f8f9fc] border border-gray-200 rounded-xl appearance-none focus:outline-none focus:ring-2 focus:ring-blue-500 transition text-gray-500">
                             <option value="" disabled selected>Select role</option>
                             <option value="ADMIN">ADMIN</option>
-                            <option value="OPERATOR">OPERATOR</option>
-                            <option value="VENDOR">VENDOR</option>
-                            <option value="DRIVER">DRIVER</option>
+                            <option value="SUPERVISOR">SUPERVISOR</option>
+                            <option value="PETUGAS_GUDANG">PETUGAS GUDANG</option>
                         </select>
                         <span class="absolute inset-y-0 right-3 flex items-center pointer-events-none text-gray-400">
                             <i data-lucide="chevron-down" class="w-5 h-5"></i>
                         </span>
                     </div>
-                </div>
-
-                <div id="vendorField">
-                    <label class="block text-sm font-bold text-gray-800 mb-2">Vendor</label>
-                    <div class="relative">
-                        <span class="absolute inset-y-0 left-3 flex items-center text-gray-400">
-                            <i data-lucide="building-2" class="w-5 h-5"></i>
-                        </span>
-                        <input type="number" id="vendor_id" placeholder="Enter vendor ID or leave blank"
-                               class="w-full pl-10 pr-4 py-2.5 bg-[#f8f9fc] border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 transition">
-                    </div>
-                    <p class="mt-1 text-xs text-gray-400">Use the existing vendor ID from the old UI.</p>
                 </div>
 
                 <div>
@@ -165,20 +152,6 @@
             lucide.createIcons();
         }
 
-        function updateVendorFieldVisibility() {
-            const role = document.getElementById('role').value;
-            const vendorField = document.getElementById('vendorField');
-            const vendorInput = document.getElementById('vendor_id');
-            const requiresVendor = role === 'VENDOR' || role === 'DRIVER';
-
-            vendorField.classList.toggle('hidden', !requiresVendor);
-            vendorInput.required = requiresVendor;
-
-            if (!requiresVendor) {
-                vendorInput.value = '';
-            }
-        }
-
         document.getElementById('registerForm').addEventListener('submit', async function(e) {
             e.preventDefault();
             const msgEl = document.getElementById('msg');
@@ -189,7 +162,6 @@
             const password = document.getElementById('password').value;
             const confirm = document.getElementById('confirm_password').value;
             const role = document.getElementById('role').value;
-            const vendor_id_input = document.getElementById('vendor_id').value;
 
             if (!username) {
                 msgEl.textContent = "Username is required";
@@ -218,8 +190,7 @@
                 username: username,
                 email: email,
                 password: password,
-                role: role,
-                vendor_id: vendor_id_input === "" ? null : parseInt(vendor_id_input, 10)
+                role: role
             };
 
             try {
@@ -253,8 +224,6 @@
             }
         });
 
-        document.getElementById('role').addEventListener('change', updateVendorFieldVisibility);
-        updateVendorFieldVisibility();
     </script>
 </body>
 </html>

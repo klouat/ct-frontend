@@ -38,7 +38,7 @@ class AuthController extends Controller
 
         return response()->json([
             'message' => $this->extractMessage($payload, 'Login successful'),
-            'redirect' => url('/home'),
+            'redirect' => url($this->landingPageForRole((string) data_get($payload, 'data.user.role', ''))),
             'user' => data_get($payload, 'data.user'),
         ]);
     }
@@ -49,8 +49,7 @@ class AuthController extends Controller
             'username' => ['required', 'string', 'max:50'],
             'email' => ['required', 'string', 'email', 'max:150'],
             'password' => ['required', 'string', 'min:8'],
-            'role' => ['required', 'in:ADMIN,OPERATOR,VENDOR,DRIVER'],
-            'vendor_id' => ['nullable', 'integer'],
+            'role' => ['required', 'in:ADMIN,SUPERVISOR,PETUGAS_GUDANG'],
         ]);
 
         $response = Http::acceptJson()
@@ -106,5 +105,14 @@ class AuthController extends Controller
             ?? data_get($payload, 'detail');
 
         return is_string($message) && $message !== '' ? $message : $fallback;
+    }
+
+    private function landingPageForRole(string $role): string
+    {
+        return match ($role) {
+            'PETUGAS_GUDANG' => '/scan',
+            'ADMIN', 'SUPERVISOR' => '/home',
+            default => '/login',
+        };
     }
 }

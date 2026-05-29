@@ -15,8 +15,6 @@ class DashboardController extends Controller
     {
         $auth = $request->session()->get('svs_auth');
         $token = data_get($auth, 'access_token');
-        $userRole = (string) data_get($auth, 'user.role', '');
-        $userVendorId = data_get($auth, 'user.vendor_id');
 
         if (! is_string($token) || $token === '') {
             return response()->json([
@@ -31,10 +29,6 @@ class DashboardController extends Controller
         $selectedVendorId = $request->filled('vendor_id')
             ? (int) $request->integer('vendor_id')
             : null;
-
-        if ($userRole === 'VENDOR' && is_numeric($userVendorId)) {
-            $selectedVendorId = (int) $userVendorId;
-        }
 
         try {
             $records = $this->fetchHistoryRecords($token, $selectedVendorId);

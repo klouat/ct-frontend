@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>EPSON SVS - Print Invoice Barcodes</title>
+    <title>EPSON SVS - Print Invoice QR</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
@@ -23,7 +23,7 @@
         <main class="flex-grow p-4 md:p-8">
             <div class="mx-auto max-w-6xl space-y-6">
                 <div class="flex flex-col gap-2">
-                    <h2 class="text-3xl font-bold text-[#001a4d]">Print Invoice Barcodes</h2>
+                    <h2 class="text-3xl font-bold text-[#001a4d]">Print Invoice QR</h2>
                     <p class="text-sm text-gray-500">List of all invoices with QR previews for printing and testing.</p>
                 </div>
 
@@ -235,7 +235,7 @@
         logActivity({
             action: 'VIEW_INVOICE_BARCODE_PAGE',
             table_name: 'pages',
-            description: 'Opened print invoice barcodes page',
+            description: 'Opened print invoice QR page',
         });
         loadInvoices();
     </script>

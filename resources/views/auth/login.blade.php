@@ -46,6 +46,7 @@
                         <input type="text" id="username" placeholder="Enter email or username"
                                class="w-full pl-10 pr-4 py-3 bg-white border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 transition">
                     </div>
+                    <p id="usernameError" class="mt-2 hidden text-sm text-red-500"></p>
                 </div>
 
                 <!-- Password -->
@@ -61,6 +62,7 @@
                             <i data-lucide="eye" id="eyeIcon" class="w-5 h-5"></i>
                         </button>
                     </div>
+                    <p id="passwordError" class="mt-2 hidden text-sm text-red-500"></p>
                 </div>
 
                 <!-- Remember + Forgot -->
@@ -97,7 +99,10 @@
                 </div>
 
                 <!-- Error Message -->
-                <p id="error" class="text-red-500 text-sm hidden text-center font-medium"></p>
+                <div id="errorSummary" class="hidden rounded-xl border border-red-200 bg-red-50 p-3 text-sm text-red-600">
+                    <p id="error" class="hidden text-center font-medium"></p>
+                    <ul id="errorList" class="hidden list-disc space-y-1 pl-5"></ul>
+                </div>
             </form>
         </div>
     </main>
@@ -113,6 +118,17 @@
         // Initialize Lucide Icons
         lucide.createIcons();
         const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+        const loginFieldMap = {
+            username: document.getElementById('username'),
+            password: document.getElementById('password')
+        };
+        const loginErrorMap = {
+            username: document.getElementById('usernameError'),
+            password: document.getElementById('passwordError')
+        };
+        const errorSummary = document.getElementById('errorSummary');
+        const errorEl = document.getElementById('error');
+        const errorList = document.getElementById('errorList');
 
         function togglePassword() {
             const password = document.getElementById('password');
@@ -127,18 +143,87 @@
             lucide.createIcons(); // Refresh icons
         }
 
+        function clearLoginErrors() {
+            Object.values(loginFieldMap).forEach((field) => {
+                field.classList.remove('border-red-400', 'ring-2', 'ring-red-100');
+                field.classList.add('border-gray-200');
+            });
+
+            Object.values(loginErrorMap).forEach((errorNode) => {
+                errorNode.textContent = '';
+                errorNode.classList.add('hidden');
+            });
+
+            errorSummary.classList.add('hidden');
+            errorEl.textContent = '';
+            errorEl.classList.add('hidden');
+            errorList.innerHTML = '';
+            errorList.classList.add('hidden');
+        }
+
+        function setLoginFieldError(fieldName, message) {
+            const field = loginFieldMap[fieldName];
+            const errorNode = loginErrorMap[fieldName];
+
+            if (!field || !errorNode || !message) {
+                return;
+            }
+
+            field.classList.remove('border-gray-200');
+            field.classList.add('border-red-400', 'ring-2', 'ring-red-100');
+            errorNode.textContent = message;
+            errorNode.classList.remove('hidden');
+        }
+
+        function renderLoginErrors(message, errors = {}) {
+            clearLoginErrors();
+
+            const entries = Object.entries(errors).filter(([, messages]) => Array.isArray(messages) && messages.length > 0);
+            const allMessages = entries.flatMap(([, messages]) => messages).filter((value) => typeof value === 'string' && value.trim() !== '');
+
+            entries.forEach(([field, messages]) => {
+                setLoginFieldError(field, messages[0]);
+            });
+
+            if (allMessages.length > 1) {
+                errorList.innerHTML = allMessages.map((item) => `<li>${item}</li>`).join('');
+                errorList.classList.remove('hidden');
+                errorSummary.classList.remove('hidden');
+                return;
+            }
+
+            if (allMessages.length === 1) {
+                errorEl.textContent = allMessages[0];
+            } else if (message) {
+                errorEl.textContent = message;
+            } else {
+                errorEl.textContent = 'Login failed';
+            }
+
+            errorEl.classList.remove('hidden');
+            errorSummary.classList.remove('hidden');
+        }
+
         document.getElementById('loginForm').addEventListener('submit', async function(e) {
             e.preventDefault();
 
             const username = document.getElementById('username').value.trim();
             const password = document.getElementById('password').value.trim();
-            const errorEl = document.getElementById('error');
-
-            errorEl.classList.add('hidden');
+            clearLoginErrors();
 
             if (!username || !password) {
-                errorEl.textContent = "Please fill all fields";
-                errorEl.classList.remove('hidden');
+                if (!username) {
+                    setLoginFieldError('username', 'Email or username is required.');
+                }
+
+                if (!password) {
+                    setLoginFieldError('password', 'Password is required.');
+                }
+
+                renderLoginErrors('Please fill in the required fields.', {
+                    username: !username ? ['Email or username is required.'] : [],
+                    password: !password ? ['Password is required.'] : []
+                });
                 return;
             }
 
@@ -157,14 +242,14 @@
                 const data = await res.json();
 
                 if (!res.ok) {
-                    throw new Error(data.message || 'Login failed');
+                    renderLoginErrors(data.message || 'Login failed', data.errors || {});
+                    return;
                 }
 
                 window.location.href = data.redirect || '/invoice';
 
             } catch (err) {
-                errorEl.textContent = err.message;
-                errorEl.classList.remove('hidden');
+                renderLoginErrors(err.message || 'Login failed');
             }
         });
     </script>

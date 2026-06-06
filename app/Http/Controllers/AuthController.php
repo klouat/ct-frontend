@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Http;
 
 class AuthController extends Controller
@@ -25,7 +26,7 @@ class AuthController extends Controller
 
         if (! $response->successful()) {
             return response()->json([
-                'message' => $this->extractMessage($payload, 'Login failed'),
+                'message' => $this->errorMessage($payload, 'Login failed'),
                 'errors' => $payload['errors'] ?? null,
             ], $response->status());
         }
@@ -61,7 +62,7 @@ class AuthController extends Controller
 
         if (! $response->successful()) {
             return response()->json([
-                'message' => $this->extractMessage($payload, 'Registration failed'),
+                'message' => $this->errorMessage($payload, 'Registration failed'),
                 'errors' => $payload['errors'] ?? null,
             ], $response->status());
         }
@@ -105,6 +106,44 @@ class AuthController extends Controller
             ?? data_get($payload, 'detail');
 
         return is_string($message) && $message !== '' ? $message : $fallback;
+    }
+
+    private function errorMessage(mixed $payload, string $fallback): string
+    {
+        $message = $this->extractMessage($payload, $fallback);
+
+        if (in_array($message, ['Validation failed', 'Login failed', 'Registration failed'], true)) {
+            $firstError = $this->firstValidationError($payload);
+
+            if ($firstError !== null) {
+                return $firstError;
+            }
+        }
+
+        return $message;
+    }
+
+    private function firstValidationError(mixed $payload): ?string
+    {
+        $errors = data_get($payload, 'errors');
+
+        if (! is_array($errors)) {
+            return null;
+        }
+
+        foreach ($errors as $messages) {
+            if (! is_array($messages)) {
+                continue;
+            }
+
+            $firstMessage = Arr::first($messages, fn (mixed $value): bool => is_string($value) && trim($value) !== '');
+
+            if (is_string($firstMessage) && $firstMessage !== '') {
+                return $firstMessage;
+            }
+        }
+
+        return null;
     }
 
     private function landingPageForRole(string $role): string

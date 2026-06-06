@@ -40,6 +40,7 @@
                         <input type="text" id="username" placeholder="Enter your username" maxlength="50" required
                                class="w-full pl-10 pr-4 py-2.5 bg-[#f8f9fc] border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 transition">
                     </div>
+                    <p id="usernameError" class="mt-2 hidden text-sm text-red-500"></p>
                 </div>
 
                 <div>
@@ -52,6 +53,7 @@
                                class="w-full pl-10 pr-4 py-2.5 bg-[#f8f9fc] border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 transition">
                     </div>
                     <p class="mt-1 text-xs text-gray-400">You can log in with either your email or your username.</p>
+                    <p id="emailError" class="mt-2 hidden text-sm text-red-500"></p>
                 </div>
 
                 <div>
@@ -71,6 +73,7 @@
                             <i data-lucide="chevron-down" class="w-5 h-5"></i>
                         </span>
                     </div>
+                    <p id="roleError" class="mt-2 hidden text-sm text-red-500"></p>
                 </div>
 
                 <div>
@@ -85,6 +88,7 @@
                             <i data-lucide="eye" id="eye1" class="w-5 h-5"></i>
                         </button>
                     </div>
+                    <p id="passwordError" class="mt-2 hidden text-sm text-red-500"></p>
                 </div>
 
                 <div>
@@ -99,6 +103,7 @@
                             <i data-lucide="eye" id="eye2" class="w-5 h-5"></i>
                         </button>
                     </div>
+                    <p id="confirmPasswordError" class="mt-2 hidden text-sm text-red-500"></p>
                 </div>
 
                 <div class="flex items-center gap-2 py-2">
@@ -123,7 +128,10 @@
                     <a href="/login" class="text-[#0033ab] font-bold text-lg hover:underline">Login</a>
                 </div>
 
-                <p id="msg" class="text-sm hidden text-center font-medium mt-4"></p>
+                <div id="messageSummary" class="hidden rounded-xl border p-3 text-sm">
+                    <p id="msg" class="hidden text-center font-medium"></p>
+                    <ul id="messageList" class="hidden list-disc space-y-1 pl-5"></ul>
+                </div>
             </form>
         </div>
     </main>
@@ -138,6 +146,23 @@
     <script>
         lucide.createIcons();
         const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+        const registerFieldMap = {
+            username: document.getElementById('username'),
+            email: document.getElementById('email'),
+            role: document.getElementById('role'),
+            password: document.getElementById('password'),
+            confirm_password: document.getElementById('confirm_password')
+        };
+        const registerErrorMap = {
+            username: document.getElementById('usernameError'),
+            email: document.getElementById('emailError'),
+            role: document.getElementById('roleError'),
+            password: document.getElementById('passwordError'),
+            confirm_password: document.getElementById('confirmPasswordError')
+        };
+        const messageSummary = document.getElementById('messageSummary');
+        const msgEl = document.getElementById('msg');
+        const messageList = document.getElementById('messageList');
 
         function togglePass(inputId, iconId) {
             const input = document.getElementById(inputId);
@@ -152,10 +177,79 @@
             lucide.createIcons();
         }
 
+        function clearRegisterErrors() {
+            Object.values(registerFieldMap).forEach((field) => {
+                field.classList.remove('border-red-400', 'ring-2', 'ring-red-100');
+                field.classList.add('border-gray-200');
+            });
+
+            Object.values(registerErrorMap).forEach((errorNode) => {
+                errorNode.textContent = '';
+                errorNode.classList.add('hidden');
+            });
+
+            messageSummary.className = 'hidden rounded-xl border p-3 text-sm';
+            msgEl.textContent = '';
+            msgEl.classList.add('hidden');
+            messageList.innerHTML = '';
+            messageList.classList.add('hidden');
+        }
+
+        function setRegisterFieldError(fieldName, message) {
+            const field = registerFieldMap[fieldName];
+            const errorNode = registerErrorMap[fieldName];
+
+            if (!field || !errorNode || !message) {
+                return;
+            }
+
+            field.classList.remove('border-gray-200');
+            field.classList.add('border-red-400', 'ring-2', 'ring-red-100');
+            errorNode.textContent = message;
+            errorNode.classList.remove('hidden');
+        }
+
+        function showRegisterSummary(message, type = 'error', items = []) {
+            messageSummary.className = 'rounded-xl border p-3 text-sm';
+
+            if (type === 'success') {
+                messageSummary.classList.add('border-green-200', 'bg-green-50', 'text-green-600');
+            } else {
+                messageSummary.classList.add('border-red-200', 'bg-red-50', 'text-red-600');
+            }
+
+            if (items.length > 1) {
+                messageList.innerHTML = items.map((item) => `<li>${item}</li>`).join('');
+                messageList.classList.remove('hidden');
+                msgEl.classList.add('hidden');
+            } else {
+                msgEl.textContent = items[0] || message;
+                msgEl.classList.remove('hidden');
+                messageList.classList.add('hidden');
+            }
+        }
+
+        function renderRegisterErrors(message, errors = {}) {
+            clearRegisterErrors();
+
+            const entries = Object.entries(errors).filter(([, messages]) => Array.isArray(messages) && messages.length > 0);
+            const allMessages = entries.flatMap(([, messages]) => messages).filter((value) => typeof value === 'string' && value.trim() !== '');
+
+            entries.forEach(([field, messages]) => {
+                setRegisterFieldError(field, messages[0]);
+            });
+
+            if (allMessages.length > 0) {
+                showRegisterSummary(message, 'error', allMessages);
+                return;
+            }
+
+            showRegisterSummary(message || 'Registration failed', 'error');
+        }
+
         document.getElementById('registerForm').addEventListener('submit', async function(e) {
             e.preventDefault();
-            const msgEl = document.getElementById('msg');
-            msgEl.className = "text-sm hidden text-center font-medium mt-4";
+            clearRegisterErrors();
 
             const username = document.getElementById('username').value.trim();
             const email = document.getElementById('email').value.trim();
@@ -164,28 +258,27 @@
             const role = document.getElementById('role').value;
 
             if (!username) {
-                msgEl.textContent = "Username is required";
-                msgEl.classList.add('text-red-500', 'block');
-                msgEl.classList.remove('hidden');
+                renderRegisterErrors('Please fill in the required fields.', {
+                    username: ['Username is required.']
+                });
                 return;
             }
 
             if (!email) {
-                msgEl.textContent = "Email is required";
-                msgEl.classList.add('text-red-500', 'block');
-                msgEl.classList.remove('hidden');
+                renderRegisterErrors('Please fill in the required fields.', {
+                    email: ['Email is required.']
+                });
                 return;
             }
 
-            // Basic Client Validations
             if (password !== confirm) {
-                msgEl.textContent = "Passwords do not match";
-                msgEl.classList.add('text-red-500', 'block');
-                msgEl.classList.remove('hidden');
+                renderRegisterErrors('Please review the highlighted fields.', {
+                    password: ['Passwords do not match.'],
+                    confirm_password: ['Passwords do not match.']
+                });
                 return;
             }
 
-            // --- PAYLOAD CONSTRUCTION ---
             const payload = {
                 username: username,
                 email: email,
@@ -208,19 +301,17 @@
                 const data = await res.json();
 
                 if (!res.ok) {
-                    throw new Error(data.message || 'Registration failed');
+                    renderRegisterErrors(data.message || 'Registration failed', data.errors || {});
+                    return;
                 }
 
-                msgEl.textContent = data.message || "Registration successful! Redirecting...";
-                msgEl.classList.add('text-green-500', 'block');
-                msgEl.classList.remove('hidden');
+                clearRegisterErrors();
+                showRegisterSummary(data.message || 'Registration successful! Redirecting...', 'success');
                 
                 setTimeout(() => window.location.href = data.redirect || '/login', 1500);
 
             } catch (err) {
-                msgEl.textContent = err.message;
-                msgEl.classList.add('text-red-500', 'block');
-                msgEl.classList.remove('hidden');
+                renderRegisterErrors(err.message || 'Registration failed');
             }
         });
 

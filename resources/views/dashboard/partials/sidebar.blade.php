@@ -9,13 +9,13 @@
         ],
         'PETUGAS_GUDANG' => [
             ['key' => 'scan', 'label' => 'Scanner', 'icon' => 'scan', 'href' => '/scan'],
-            ['key' => 'invoice-barcodes', 'label' => 'Barcode Preview', 'icon' => 'barcode', 'href' => '/invoice-barcodes'],
+            ['key' => 'invoice-barcodes', 'label' => 'QR Preview', 'icon' => 'qr-code', 'href' => '/invoice-barcodes'],
         ],
         default => [
             ['key' => 'home', 'label' => 'Dashboard', 'icon' => 'layout-grid', 'href' => '/home'],
             ['key' => 'scan', 'label' => 'Scanner', 'icon' => 'scan', 'href' => '/scan'],
             ['key' => 'invoice', 'label' => 'Input Invoice', 'icon' => 'file-text', 'href' => '/invoice'],
-            ['key' => 'invoice-barcodes', 'label' => 'Barcode Preview', 'icon' => 'barcode', 'href' => '/invoice-barcodes'],
+            ['key' => 'invoice-barcodes', 'label' => 'QR Preview', 'icon' => 'qr-code', 'href' => '/invoice-barcodes'],
             ['key' => 'history', 'label' => 'History', 'icon' => 'history', 'href' => '/history'],
             ['key' => 'audit-logs', 'label' => 'Audit Logs', 'icon' => 'scroll-text', 'href' => '/audit-logs'],
         ],
@@ -24,7 +24,9 @@
 
 <aside class="hidden lg:flex flex-col w-64 bg-white shadow-xl z-20">
     <div class="p-6 mb-4">
-        <h1 class="text-[#0033ab] font-black text-2xl tracking-tighter">EPSON</h1>
+        <h1 class="text-[#0033ab] font-black text-2xl tracking-tighter">
+            <i data-lucide="qr-code" class="w-8 h-8 inline-block mr-2"></i>EPSON
+        </h1>
     </div>
 
     <nav class="flex-grow space-y-1 px-4">
@@ -57,7 +59,9 @@
 
 <aside id="mobileSidebar" class="fixed inset-y-0 left-0 z-50 flex w-64 -translate-x-full flex-col bg-white shadow-xl transition-transform duration-300 ease-in-out lg:hidden">
     <div class="flex items-center justify-between border-b border-gray-100 p-6">
-        <h1 class="text-[#0033ab] font-black text-2xl tracking-tighter">EPSON</h1>
+        <h1 class="text-[#0033ab] font-black text-2xl tracking-tighter">
+            <i data-lucide="qr-code" class="w-8 h-8 inline-block mr-2"></i>EPSON
+        </h1>
         <button type="button" data-close-mobile-sidebar class="rounded-lg p-2 text-gray-500 hover:bg-gray-100">
             <i data-lucide="x" class="w-5 h-5"></i>
         </button>

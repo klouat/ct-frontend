@@ -232,7 +232,14 @@
                 const data = await response.json();
 
                 if (!response.ok) {
-                    throw new Error(data.message || 'Failed to create invoice');
+                    let errMsg = data.message || 'Failed to create invoice';
+                    if (data.errors && typeof data.errors === 'object') {
+                        const firstKey = Object.keys(data.errors)[0];
+                        if (firstKey && Array.isArray(data.errors[firstKey]) && data.errors[firstKey].length > 0) {
+                            errMsg = data.errors[firstKey][0];
+                        }
+                    }
+                    throw new Error(errMsg);
                 }
 
                 const savedStatus = data.data?.status || 'pending';

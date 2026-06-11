@@ -339,7 +339,7 @@
 
                 const vendors = Array.isArray(payload.data) ? payload.data : [];
                 const options = vendors.map((vendor) => `<option value="${vendor.vendor_id}">${vendor.vendor_name}</option>`).join('');
-                const includeAll = vendors.length > 1 ? '<option value="">All Vendors</option>' : '';
+                const includeAll = vendors.length > 1 ? '<option value="">All Vendor</option>' : '';
                 vendorFilter.innerHTML = `${includeAll}${options}`;
             } catch (error) {
                 setDashboardMessage(error.message || 'Failed to load vendors');

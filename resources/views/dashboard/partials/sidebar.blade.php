@@ -15,7 +15,6 @@
         ],
         default => [
             ['key' => 'home', 'label' => 'Dashboard', 'icon' => 'layout-grid', 'href' => '/home'],
-            ['key' => 'scan', 'label' => 'Scanner', 'icon' => 'scan', 'href' => '/scan'],
             ['key' => 'invoice', 'label' => 'Input Invoice', 'icon' => 'file-text', 'href' => '/invoice'],
             ['key' => 'history', 'label' => 'History', 'icon' => 'history', 'href' => '/history'],
             ['key' => 'audit-logs', 'label' => 'Audit Logs', 'icon' => 'scroll-text', 'href' => '/audit-logs'],

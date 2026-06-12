@@ -20,7 +20,37 @@ class VendorController extends Controller
 
     public function index(Request $request): JsonResponse
     {
-        return $this->forwardGet($request, '/api/vendors', ['per_page' => 100]);
+        $token = $this->resolveToken($request);
+
+        if ($token === null) {
+            return response()->json(['message' => 'Your session has expired. Please log in again.'], 401);
+        }
+
+        try {
+            $response = Http::acceptJson()
+                ->withoutVerifying()
+                ->timeout(20)
+                ->withToken($token)
+                ->get($this->apiUrl('/api/vendors'), ['per_page' => 100]);
+        } catch (ConnectionException) {
+            return response()->json(['message' => 'Could not reach the SVS API at port 8000.'], 503);
+        }
+
+        $body = $response->json();
+        $this->handleUnauthorized($request, $response->status());
+
+        if (!$response->successful()) {
+            return response()->json([
+                'message' => $this->extractMessage($body, 'Failed to load vendors'),
+                'errors'  => $body['errors'] ?? null,
+            ], $response->status());
+        }
+
+        // Return a flat array so dashboard/invoice dropdowns work with Array.isArray(payload.data)
+        return response()->json([
+            'message' => $this->extractMessage($body, 'Vendor options loaded successfully'),
+            'data'    => data_get($body, 'data.items', data_get($body, 'data', [])),
+        ]);
     }
 
     public function store(Request $request): JsonResponse

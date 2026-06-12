@@ -157,10 +157,16 @@ class AuthController extends Controller
 
     public function publicVendors(): JsonResponse
     {
-        $response = Http::acceptJson()
-            ->withoutVerifying()
-            ->timeout(15)
-            ->get($this->apiUrl('/api/public/vendors'));
+        try {
+            $response = Http::acceptJson()
+                ->withoutVerifying()
+                ->timeout(15)
+                ->get($this->apiUrl('/api/public/vendors'));
+        } catch (\Illuminate\Http\Client\ConnectionException) {
+            return response()->json([
+                'message' => 'Could not reach the SVS API.',
+            ], 503);
+        }
 
         if (! $response->successful()) {
             return response()->json(['message' => 'Failed to load vendors'], $response->status());

@@ -186,7 +186,7 @@
 
         async function loadVendors() {
             try {
-                const res = await fetch('/api/public/vendors');
+                const res = await fetch('/public/vendors');
                 const data = await res.json();
                 if (data && data.data && data.data.items) {
                     const vendorSelect = document.getElementById('vendor_id');

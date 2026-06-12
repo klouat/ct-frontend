@@ -135,7 +135,7 @@
             }
 
             barcodeList.innerHTML = items.map((item, index) => {
-                const vendorName = item.vendor?.vendor_name || 'Unknown Vendor';
+                const vendorName = item.vendor_name || 'Unknown Vendor';
                 const status = item.status || 'not_scanned';
                 let actionBtnHtml = '';
                 let statusBadge = '';
@@ -201,7 +201,7 @@
             const item = window.invoiceBarcodeItems[index];
             if (!item) return;
             
-            const vendorName = item.vendor?.vendor_name || 'Unknown Vendor';
+            const vendorName = item.vendor_name || 'Unknown Vendor';
             document.getElementById('modalContent').innerHTML = `
                 <p><strong>Invoice ID:</strong> ${item.invoice_code || '-'}</p>
                 <p><strong>Product:</strong> ${item.product_name || '-'}</p>
@@ -277,7 +277,7 @@
                 description: `Printed invoice QR for ${item.invoice_code || '-'}`,
             });
 
-            const vendorName = item.vendor?.vendor_name || 'Unknown Vendor';
+            const vendorName = item.vendor_name || 'Unknown Vendor';
             const barcodeValue = item.qr_text || item.invoice_code || '';
 
             printWindow.document.write(`

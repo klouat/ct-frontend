@@ -39,17 +39,7 @@
                                class="w-full p-4 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500">
                     </div>
 
-                    <div>
-                        <label class="block text-sm font-semibold text-gray-600 mb-2">Invoice ID</label>
-                        <input type="text" id="invoice_id" required placeholder="Contoh: inv-0123"
-                               class="w-full p-4 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500">
-                    </div>
 
-                    <div>
-                        <label class="block text-sm font-semibold text-gray-600 mb-2">Product ID</label>
-                        <input type="text" id="product_id" required placeholder="Contoh: pd-0123"
-                               class="w-full p-4 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500">
-                    </div>
 
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div>
@@ -64,10 +54,7 @@
                         </div>
                     </div>
 
-                    <div class="bg-blue-50 border border-blue-100 p-4 rounded-xl flex gap-3">
-                        <i data-lucide="info" class="text-blue-600 shrink-0"></i>
-                        <p class="text-xs text-blue-900">Pastikan Invoice ID sesuai dengan yang dikirim vendor untuk menghindari penolakan saat unloading di dermaga.</p>
-                    </div>
+
 
                     <p id="formError" class="hidden rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm font-medium text-red-600"></p>
 
@@ -212,8 +199,6 @@
             const payload = {
                 vendor_name: document.querySelector('select[name="vendor_name[]"]').value.trim(),
                 product_name: document.getElementById('product_name').value.trim(),
-                invoice_id: document.getElementById('invoice_id').value.trim(),
-                product_id: document.getElementById('product_id').value.trim(),
                 box_count: Number(document.getElementById('box_count').value),
                 arrival_date: document.getElementById('arrival_date').value || null
             };
@@ -244,9 +229,9 @@
 
                 const savedStatus = data.data?.status || 'pending';
                 document.getElementById('res-vendor').innerText = payload.vendor_name;
-                document.getElementById('res-invoice').innerText = payload.invoice_id;
+                document.getElementById('res-invoice').innerText = data.data?.invoice_code || '-';
                 document.getElementById('res-product-name').innerText = payload.product_name;
-                document.getElementById('res-product-id').innerText = payload.product_id;
+                document.getElementById('res-product-id').innerText = data.data?.product_id || '-';
                 document.getElementById('res-box-count').innerText = String(payload.box_count);
                 document.getElementById('res-arrival-date').innerText = formatArrivalDate(payload.arrival_date);
                 applyStatusBadge(savedStatus);

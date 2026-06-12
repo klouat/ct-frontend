@@ -15,6 +15,7 @@ Route::get('/', function () {
     if (session()->has('svs_auth.access_token')) {
         return redirect(match ((string) session('svs_auth.user.role', '')) {
             'PETUGAS_GUDANG' => '/scan',
+            'VENDOR' => '/invoice-barcodes',
             'ADMIN', 'SUPERVISOR' => '/home',
             default => '/login',
         });
@@ -56,8 +57,8 @@ Route::get('/invoice', function () {
 })->middleware('frontend.auth:ADMIN');
 Route::get('/invoice-barcodes', function () {
     return view('dashboard.invoice-barcodes');
-})->middleware('frontend.auth:ADMIN,PETUGAS_GUDANG');
-Route::get('/invoice-barcodes/data', [InvoiceBarcodeController::class, 'index'])->middleware('frontend.auth:ADMIN,PETUGAS_GUDANG');
+})->middleware('frontend.auth:VENDOR');
+Route::get('/invoice-barcodes/data', [InvoiceBarcodeController::class, 'index'])->middleware('frontend.auth:VENDOR');
 
 Route::post('/invoice', [InvoiceController::class, 'store'])->middleware('frontend.auth:ADMIN');
 Route::get('/vendors/options', [VendorController::class, 'index'])->middleware('frontend.auth:ADMIN');

@@ -29,7 +29,7 @@ class InvoiceBarcodeController extends Controller
                 ->withoutVerifying()
                 ->timeout(20)
                 ->withToken($token)
-                ->get($this->apiUrl('/api/invoices'), $query);
+                ->get($this->apiUrl('/api/qr-preview'), $query);
 
             $this->logActivity($token, [
                 'action' => 'VIEW_INVOICE_BARCODE_DATA',

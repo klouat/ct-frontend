@@ -12,10 +12,8 @@ class InvoiceController extends Controller
     public function store(Request $request): JsonResponse
     {
         $validated = $request->validate([
-            'invoice_id' => ['required', 'string', 'max:100'],
             'vendor_name' => ['required', 'string', 'max:100'],
             'product_name' => ['required', 'string', 'max:150'],
-            'product_id' => ['required', 'string', 'max:100'],
             'box_count' => ['required', 'integer', 'min:1'],
             'arrival_date' => ['nullable', 'date'],
         ]);
@@ -29,12 +27,15 @@ class InvoiceController extends Controller
             ], 401);
         }
 
+        $invoiceId = 'INV-' . strtoupper(uniqid());
+        $productId = 'PD-' . strtoupper(uniqid());
+
         $payload = [
-            'invoice_code' => $validated['invoice_id'],
-            'po_number' => $validated['invoice_id'],
+            'invoice_code' => $invoiceId,
+            'po_number' => $invoiceId,
             'vendor_name' => $validated['vendor_name'],
             'product_name' => $validated['product_name'],
-            'product_id' => $validated['product_id'],
+            'product_id' => $productId,
             'target_box_count' => $validated['box_count'],
             'estimated_arrival_date' => $validated['arrival_date'] ?? null,
         ];

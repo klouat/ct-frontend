@@ -24,6 +24,11 @@ class ScanController extends Controller
         );
     }
 
+    public function confirmScan(Request $request, int $invoiceId): JsonResponse
+    {
+        return $this->forwardRequest($request, '/api/scan/invoices/'.$invoiceId.'/confirm');
+    }
+
     public function markPending(Request $request, int $invoiceId): JsonResponse
     {
         return $this->forwardRequest($request, '/api/scan/invoices/'.$invoiceId.'/pending');

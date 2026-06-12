@@ -153,7 +153,10 @@
                         class="w-full rounded-[1.25rem] bg-[#0033ab] py-4 text-lg font-black text-white shadow-xl shadow-blue-100 transition hover:bg-blue-800 active:scale-[0.98] sm:py-5 sm:text-xl">
                         Confirm Data
                     </button>
-                    <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                    <div class="grid grid-cols-1 gap-4 sm:grid-cols-3">
+                        <button id="cancelButton" onclick="handleCancel()" class="rounded-[1.25rem] border-2 border-gray-200 bg-white py-4 text-lg font-bold text-gray-500 transition hover:bg-gray-50">
+                            Cancel
+                        </button>
                         <button id="pendingButton" onclick="markPending()" class="rounded-[1.25rem] border-2 border-blue-100 bg-white py-4 text-lg font-bold text-[#0033ab] transition hover:bg-blue-50">
                             Pending
                         </button>
@@ -289,9 +292,51 @@
             setStatusBadge(data.verification.status);
         }
 
-        function handleConfirm() {
+        async function handleConfirm() {
+            if (!activeInvoiceId) {
+                closeVerificationModal();
+                document.getElementById('systemStatus').textContent = "Verification confirmed. Ready for the next scan.";
+                setCameraStatus("Camera is active. Point it at a barcode or QR code");
+                return;
+            }
+
+            const confirmBtn = document.getElementById('confirmBtn');
+            confirmBtn.disabled = true;
+            confirmBtn.textContent = 'Confirming...';
+
+            try {
+                const response = await fetch(`/scan/invoices/${activeInvoiceId}/confirm`, {
+                    method: 'POST',
+                    headers: {
+                        'Accept': 'application/json',
+                        'X-CSRF-TOKEN': csrfToken
+                    },
+                    credentials: 'same-origin'
+                });
+                const result = await response.json();
+
+                if (!response.ok) {
+                    throw new Error(result.message || 'Failed to confirm scan');
+                }
+
+                const data = result.data || {};
+                document.getElementById('scannedCount').value = `${data.scanned_box_count || 0} / ${data.target_box_count || 0}`;
+                document.getElementById('remainingCount').value = `${Math.max((data.target_box_count || 0) - (data.scanned_box_count || 0), 0)}`;
+                setStatusBadge(data.status || 'on_progress');
+                document.getElementById('systemStatus').textContent = result.message || 'Scan confirmed. Ready for the next scan.';
+            } catch (error) {
+                alert(error.message || 'Failed to confirm scan');
+            } finally {
+                confirmBtn.disabled = false;
+                confirmBtn.textContent = 'Confirm Data';
+                closeVerificationModal();
+                setCameraStatus("Camera is active. Point it at a barcode or QR code");
+            }
+        }
+
+        function handleCancel() {
             closeVerificationModal();
-            document.getElementById('systemStatus').textContent = "Verification confirmed. Ready for the next scan.";
+            document.getElementById('systemStatus').textContent = "Scan cancelled. Ready for the next scan.";
             setCameraStatus("Camera is active. Point it at a barcode or QR code");
         }
 

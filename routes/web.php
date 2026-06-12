@@ -51,6 +51,7 @@ Route::get('/scan', function () {
     return view('dashboard.scan');
 })->middleware('frontend.auth:PETUGAS_GUDANG');
 Route::post('/scan/data', [ScanController::class, 'scan'])->middleware('frontend.auth:PETUGAS_GUDANG');
+Route::post('/scan/invoices/{invoice}/confirm', [ScanController::class, 'confirmScan'])->middleware('frontend.auth:PETUGAS_GUDANG');
 Route::post('/scan/invoices/{invoice}/pending', [ScanController::class, 'markPending'])->middleware('frontend.auth:PETUGAS_GUDANG');
 Route::post('/scan/invoices/{invoice}/complete', [ScanController::class, 'complete'])->middleware('frontend.auth:PETUGAS_GUDANG');
 

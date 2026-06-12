@@ -35,6 +35,7 @@ Route::get('/register', function () {
 });
 
 Route::post('/register', [AuthController::class, 'register']);
+Route::get('/public/vendors', [AuthController::class, 'publicVendors']);
 
 Route::post('/logout', [AuthController::class, 'logout'])->middleware('frontend.auth');
 Route::post('/activity-log', [ActivityLogController::class, 'store'])->middleware('frontend.auth');
@@ -59,6 +60,8 @@ Route::get('/invoice-barcodes', function () {
     return view('dashboard.invoice-barcodes');
 })->middleware('frontend.auth:VENDOR');
 Route::get('/invoice-barcodes/data', [InvoiceBarcodeController::class, 'index'])->middleware('frontend.auth:VENDOR');
+Route::post('/invoice-barcodes/accept/{id}', [InvoiceBarcodeController::class, 'accept'])->middleware('frontend.auth:VENDOR');
+Route::post('/invoice-barcodes/reject/{id}', [InvoiceBarcodeController::class, 'reject'])->middleware('frontend.auth:VENDOR');
 
 Route::post('/invoice', [InvoiceController::class, 'store'])->middleware('frontend.auth:ADMIN');
 Route::get('/vendors/options', [VendorController::class, 'index'])->middleware('frontend.auth:ADMIN');

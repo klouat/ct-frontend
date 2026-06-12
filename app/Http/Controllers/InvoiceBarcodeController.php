@@ -88,4 +88,48 @@ class InvoiceBarcodeController extends Controller
 
         return is_string($message) && $message !== '' ? $message : $fallback;
     }
+
+    public function accept(Request $request, $id): JsonResponse
+    {
+        $auth = $request->session()->get('svs_auth');
+        $token = data_get($auth, 'access_token');
+
+        if (! is_string($token) || $token === '') {
+            return response()->json(['message' => 'Unauthorized'], 401);
+        }
+
+        try {
+            $response = Http::acceptJson()
+                ->withoutVerifying()
+                ->timeout(20)
+                ->withToken($token)
+                ->post($this->apiUrl("/api/invoices/{$id}/accept"));
+
+            return response()->json($response->json(), $response->status());
+        } catch (ConnectionException) {
+            return response()->json(['message' => 'Service Unavailable'], 503);
+        }
+    }
+
+    public function reject(Request $request, $id): JsonResponse
+    {
+        $auth = $request->session()->get('svs_auth');
+        $token = data_get($auth, 'access_token');
+
+        if (! is_string($token) || $token === '') {
+            return response()->json(['message' => 'Unauthorized'], 401);
+        }
+
+        try {
+            $response = Http::acceptJson()
+                ->withoutVerifying()
+                ->timeout(20)
+                ->withToken($token)
+                ->post($this->apiUrl("/api/invoices/{$id}/reject"));
+
+            return response()->json($response->json(), $response->status());
+        } catch (ConnectionException) {
+            return response()->json(['message' => 'Service Unavailable'], 503);
+        }
+    }
 }

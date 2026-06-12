@@ -154,4 +154,18 @@ class AuthController extends Controller
             default => '/login',
         };
     }
+
+    public function publicVendors(): JsonResponse
+    {
+        $response = Http::acceptJson()
+            ->withoutVerifying()
+            ->timeout(15)
+            ->get($this->apiUrl('/api/public/vendors'));
+
+        if (! $response->successful()) {
+            return response()->json(['message' => 'Failed to load vendors'], $response->status());
+        }
+
+        return response()->json($response->json());
+    }
 }

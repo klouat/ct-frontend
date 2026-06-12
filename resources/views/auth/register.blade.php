@@ -68,12 +68,30 @@
                             <option value="ADMIN">ADMIN</option>
                             <option value="SUPERVISOR">SUPERVISOR</option>
                             <option value="PETUGAS_GUDANG">PETUGAS GUDANG</option>
+                            <option value="VENDOR">VENDOR</option>
                         </select>
                         <span class="absolute inset-y-0 right-3 flex items-center pointer-events-none text-gray-400">
                             <i data-lucide="chevron-down" class="w-5 h-5"></i>
                         </span>
                     </div>
                     <p id="roleError" class="mt-2 hidden text-sm text-red-500"></p>
+                </div>
+
+                <div id="vendorField" class="hidden">
+                    <label class="block text-sm font-bold text-gray-800 mb-2">Vendor</label>
+                    <div class="relative">
+                        <span class="absolute inset-y-0 left-3 flex items-center text-gray-400">
+                            <i data-lucide="building" class="w-5 h-5"></i>
+                        </span>
+                        <select id="vendor_id"
+                                class="w-full pl-10 pr-10 py-2.5 bg-[#f8f9fc] border border-gray-200 rounded-xl appearance-none focus:outline-none focus:ring-2 focus:ring-blue-500 transition text-gray-500">
+                            <option value="" disabled selected>Select vendor</option>
+                        </select>
+                        <span class="absolute inset-y-0 right-3 flex items-center pointer-events-none text-gray-400">
+                            <i data-lucide="chevron-down" class="w-5 h-5"></i>
+                        </span>
+                    </div>
+                    <p id="vendorIdError" class="mt-2 hidden text-sm text-red-500"></p>
                 </div>
 
                 <div>
@@ -150,6 +168,7 @@
             username: document.getElementById('username'),
             email: document.getElementById('email'),
             role: document.getElementById('role'),
+            vendor_id: document.getElementById('vendor_id'),
             password: document.getElementById('password'),
             confirm_password: document.getElementById('confirm_password')
         };
@@ -157,12 +176,42 @@
             username: document.getElementById('usernameError'),
             email: document.getElementById('emailError'),
             role: document.getElementById('roleError'),
+            vendor_id: document.getElementById('vendorIdError'),
             password: document.getElementById('passwordError'),
             confirm_password: document.getElementById('confirmPasswordError')
         };
         const messageSummary = document.getElementById('messageSummary');
         const msgEl = document.getElementById('msg');
         const messageList = document.getElementById('messageList');
+
+        async function loadVendors() {
+            try {
+                const res = await fetch('/public/vendors');
+                const data = await res.json();
+                if (data && data.data && data.data.items) {
+                    const vendorSelect = document.getElementById('vendor_id');
+                    data.data.items.forEach(vendor => {
+                        const option = document.createElement('option');
+                        option.value = vendor.vendor_id;
+                        option.textContent = vendor.vendor_name;
+                        vendorSelect.appendChild(option);
+                    });
+                }
+            } catch (err) {
+                console.error('Failed to load vendors', err);
+            }
+        }
+
+        document.getElementById('role').addEventListener('change', function() {
+            const vendorField = document.getElementById('vendorField');
+            if (this.value === 'VENDOR') {
+                vendorField.classList.remove('hidden');
+            } else {
+                vendorField.classList.add('hidden');
+            }
+        });
+
+        loadVendors();
 
         function togglePass(inputId, iconId) {
             const input = document.getElementById(inputId);
@@ -256,6 +305,7 @@
             const password = document.getElementById('password').value;
             const confirm = document.getElementById('confirm_password').value;
             const role = document.getElementById('role').value;
+            const vendorId = document.getElementById('vendor_id').value;
 
             if (!username) {
                 renderRegisterErrors('Please fill in the required fields.', {
@@ -267,6 +317,13 @@
             if (!email) {
                 renderRegisterErrors('Please fill in the required fields.', {
                     email: ['Email is required.']
+                });
+                return;
+            }
+
+            if (role === 'VENDOR' && !vendorId) {
+                renderRegisterErrors('Please fill in the required fields.', {
+                    vendor_id: ['Vendor is required for VENDOR role.']
                 });
                 return;
             }
@@ -285,6 +342,10 @@
                 password: password,
                 role: role
             };
+
+            if (role === 'VENDOR') {
+                payload.vendor_id = vendorId;
+            }
 
             try {
                 const res = await fetch('/register', {

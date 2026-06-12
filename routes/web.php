@@ -68,6 +68,14 @@ Route::post('/invoice-barcodes/reject/{id}', [InvoiceBarcodeController::class, '
 Route::post('/invoice', [InvoiceController::class, 'store'])->middleware('frontend.auth:ADMIN');
 Route::get('/vendors/options', [VendorController::class, 'index'])->middleware('frontend.auth:ADMIN');
 
+Route::get('/vendors', function () {
+    return view('dashboard.vendor');
+})->middleware('frontend.auth:ADMIN');
+Route::get('/vendors/data', [VendorController::class, 'list'])->middleware('frontend.auth:ADMIN');
+Route::post('/vendors', [VendorController::class, 'store'])->middleware('frontend.auth:ADMIN');
+Route::put('/vendors/{id}', [VendorController::class, 'update'])->middleware('frontend.auth:ADMIN');
+Route::delete('/vendors/{id}', [VendorController::class, 'destroy'])->middleware('frontend.auth:ADMIN');
+
 Route::get('/history', function () {
     return view('dashboard.history');
 })->middleware('frontend.auth:ADMIN');

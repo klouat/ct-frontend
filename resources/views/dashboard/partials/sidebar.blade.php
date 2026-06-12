@@ -14,9 +14,10 @@
             ['key' => 'invoice-barcodes', 'label' => 'QR Preview', 'icon' => 'qr-code', 'href' => '/invoice-barcodes'],
         ],
         default => [
-            ['key' => 'home', 'label' => 'Dashboard', 'icon' => 'layout-grid', 'href' => '/home'],
-            ['key' => 'invoice', 'label' => 'Input Invoice', 'icon' => 'file-text', 'href' => '/invoice'],
-            ['key' => 'history', 'label' => 'History', 'icon' => 'history', 'href' => '/history'],
+            ['key' => 'home',    'label' => 'Dashboard',     'icon' => 'layout-grid', 'href' => '/home'],
+            ['key' => 'invoice', 'label' => 'Input Invoice', 'icon' => 'file-text',   'href' => '/invoice'],
+            ['key' => 'vendors', 'label' => 'Vendors',       'icon' => 'building-2',  'href' => '/vendors'],
+            ['key' => 'history', 'label' => 'History',       'icon' => 'history',     'href' => '/history'],
             ['key' => 'audit-logs', 'label' => 'Audit Logs', 'icon' => 'scroll-text', 'href' => '/audit-logs'],
         ],
     };

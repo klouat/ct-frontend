@@ -210,12 +210,12 @@
                 <p><strong>Total Box:</strong> ${item.target_box_count || 0}</p>
             `;
             
-            let btnHtml = \`<button type="button" onclick="closeDetailModal()" class="rounded-xl bg-gray-200 px-4 py-2 font-bold text-gray-700 hover:bg-gray-300">Close</button>\`;
+            let btnHtml = `<button type="button" onclick="closeDetailModal()" class="rounded-xl bg-gray-200 px-4 py-2 font-bold text-gray-700 hover:bg-gray-300">Close</button>`;
             if (item.status === 'pending_vendor_approval') {
-                btnHtml += \`
-                    <button type="button" onclick="rejectInvoice('\${item.invoice_id}')" class="rounded-xl bg-red-500 px-4 py-2 font-bold text-white hover:bg-red-600">Deny</button>
-                    <button type="button" onclick="acceptInvoice('\${item.invoice_id}')" class="rounded-xl bg-green-500 px-4 py-2 font-bold text-white hover:bg-green-600">Accept</button>
-                \`;
+                btnHtml += `
+                    <button type="button" onclick="rejectInvoice('${item.invoice_id}')" class="rounded-xl bg-red-500 px-4 py-2 font-bold text-white hover:bg-red-600">Deny</button>
+                    <button type="button" onclick="acceptInvoice('${item.invoice_id}')" class="rounded-xl bg-green-500 px-4 py-2 font-bold text-white hover:bg-green-600">Accept</button>
+                `;
             }
             document.getElementById('modalActions').innerHTML = btnHtml;
             document.getElementById('detailModal').classList.remove('hidden');

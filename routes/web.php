@@ -36,6 +36,7 @@ Route::get('/register', function () {
 
 Route::post('/register', [AuthController::class, 'register']);
 Route::get('/public/vendors', [AuthController::class, 'publicVendors']);
+Route::get('/vendors', [AuthController::class, 'publicVendors']);
 
 Route::post('/logout', [AuthController::class, 'logout'])->middleware('frontend.auth');
 Route::post('/activity-log', [ActivityLogController::class, 'store'])->middleware('frontend.auth');

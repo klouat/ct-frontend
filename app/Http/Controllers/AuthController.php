@@ -50,7 +50,8 @@ class AuthController extends Controller
             'username' => ['required', 'string', 'max:50'],
             'email' => ['required', 'string', 'email', 'max:150'],
             'password' => ['required', 'string', 'min:8'],
-            'role' => ['required', 'in:ADMIN,SUPERVISOR,PETUGAS_GUDANG'],
+            'role' => ['required', 'in:ADMIN,SUPERVISOR,PETUGAS_GUDANG,VENDOR'],
+            'vendor_id' => ['required_if:role,VENDOR', 'integer', 'nullable'],
         ]);
 
         $response = Http::acceptJson()

@@ -188,12 +188,30 @@ class DashboardController extends Controller
 
     private function extractStatusCounts(array $record): array
     {
+        $matchBoxCount   = max((int) ($record['match_box_count'] ?? 0), 0);
+        $lessBoxCount    = max((int) ($record['less_box_count'] ?? 0), 0);
+        $mismatchBoxCount = max((int) ($record['mismatch_box_count'] ?? 0), 0);
+        $pendingBoxCount = max((int) ($record['pending_box_count'] ?? 0), 0);
+        $overBoxCount    = max((int) ($record['over_box_count'] ?? 0), 0);
+
+        $status = strtolower(trim((string) ($record['status'] ?? '')));
+
+        // For on_progress invoices, the scan loop sets pending_box_count=0 and only
+        // increments match_box_count. The remaining unscanned boxes must be derived
+        // from target - scanned so the dashboard shows match X / pending Y correctly.
+        if ($status === 'on_progress') {
+            $targetBoxCount  = max((int) ($record['box_quantity'] ?? $record['quantity'] ?? $record['target_box_count'] ?? 0), 0);
+            $scannedBoxCount = max((int) ($record['scanned_box_count'] ?? 0), 0);
+            $remaining = max($targetBoxCount - $scannedBoxCount, 0);
+            $pendingBoxCount = $remaining;
+        }
+
         $counts = [
-            'match' => max((int) ($record['match_box_count'] ?? 0), 0),
-            'less' => max((int) ($record['less_box_count'] ?? 0), 0),
-            'mismatch' => max((int) ($record['mismatch_box_count'] ?? 0), 0),
-            'pending' => max((int) ($record['pending_box_count'] ?? 0), 0),
-            'over' => max((int) ($record['over_box_count'] ?? 0), 0),
+            'match'    => $matchBoxCount,
+            'less'     => $lessBoxCount,
+            'mismatch' => $mismatchBoxCount,
+            'pending'  => $pendingBoxCount,
+            'over'     => $overBoxCount,
         ];
 
         if (array_sum($counts) > 0) {
@@ -201,15 +219,14 @@ class DashboardController extends Controller
         }
 
         $boxQuantity = max((int) ($record['box_quantity'] ?? $record['quantity'] ?? 0), 0);
-        $status = strtolower(trim((string) ($record['status'] ?? '')));
 
         return match ($status) {
-            'less' => ['match' => 0, 'less' => $boxQuantity, 'mismatch' => 0, 'pending' => 0, 'over' => 0],
+            'less'                          => ['match' => 0, 'less' => $boxQuantity, 'mismatch' => 0, 'pending' => 0, 'over' => 0],
             'match', 'done', 'terverifikasi' => ['match' => $boxQuantity, 'less' => 0, 'mismatch' => 0, 'pending' => 0, 'over' => 0],
-            'mismatch' => ['match' => 0, 'less' => 0, 'mismatch' => $boxQuantity, 'pending' => 0, 'over' => 0],
-            'over' => ['match' => 0, 'less' => 0, 'mismatch' => 0, 'pending' => 0, 'over' => $boxQuantity],
-            'pending', 'not_scanned', 'on_progress' => ['match' => 0, 'less' => 0, 'mismatch' => 0, 'pending' => $boxQuantity, 'over' => 0],
-            default => ['match' => 0, 'less' => 0, 'mismatch' => 0, 'pending' => 0, 'over' => 0],
+            'mismatch'                      => ['match' => 0, 'less' => 0, 'mismatch' => $boxQuantity, 'pending' => 0, 'over' => 0],
+            'over'                          => ['match' => 0, 'less' => 0, 'mismatch' => 0, 'pending' => 0, 'over' => $boxQuantity],
+            'pending', 'on_progress'        => ['match' => 0, 'less' => 0, 'mismatch' => 0, 'pending' => $boxQuantity, 'over' => 0],
+            default                         => ['match' => 0, 'less' => 0, 'mismatch' => 0, 'pending' => 0, 'over' => 0],
         };
     }
 

@@ -74,6 +74,12 @@ class DashboardController extends Controller
         $selectedVendorName = null;
         
         foreach ($records as $record) {
+            $recordStatus = strtolower(trim((string) ($record['status'] ?? '')));
+
+            if (in_array($recordStatus, ['rejected_by_vendor', 'pending_vendor_approval', 'not_scanned'], true)) {
+                continue;
+            }
+
             $activityAt = (string) ($record['last_scanned_at'] ?? $record['created_at'] ?? $record['recorded_at'] ?? '');
             $boxDate = $activityAt !== ''
                 ? Carbon::parse($activityAt)->toDateString()

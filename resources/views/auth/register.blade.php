@@ -186,17 +186,22 @@
 
         async function loadVendors() {
             try {
-                const res = await fetch('/public/vendors');
-                const data = await res.json();
-                if (data && data.data && data.data.items) {
-                    const vendorSelect = document.getElementById('vendor_id');
-                    data.data.items.forEach(vendor => {
-                        const option = document.createElement('option');
-                        option.value = vendor.vendor_id;
-                        option.textContent = vendor.vendor_name;
-                        vendorSelect.appendChild(option);
-                    });
+                const response = await fetch('/public/vendors', {
+                    headers: { 'Accept': 'application/json' },
+                    credentials: 'same-origin'
+                });
+                
+                const payload = await response.json();
+
+                if (!response.ok) {
+                    throw new Error(payload.message || 'Failed to load vendors');
                 }
+
+                const vendors = payload.data?.items || (Array.isArray(payload.data) ? payload.data : []);
+                const options = vendors.map((vendor) => `<option value="${vendor.vendor_id}">${vendor.vendor_name}</option>`).join('');
+                const selectPrompt = '<option value="" disabled selected>Select vendor</option>';
+                
+                document.getElementById('vendor_id').innerHTML = `${selectPrompt}${options}`;
             } catch (err) {
                 console.error('Failed to load vendors', err);
             }

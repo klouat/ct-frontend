@@ -11,6 +11,10 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware): void {
+        $middleware->web(append: [
+            \App\Http\Middleware\RestoreFrontendRememberedAuth::class,
+        ]);
+
         $middleware->alias([
             'frontend.auth' => \App\Http\Middleware\EnsureFrontendAuthenticated::class,
         ]);

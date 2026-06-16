@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Middleware\AuthCookieManager;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -15,6 +16,7 @@ class AuthController extends Controller
         $validated = $request->validate([
             'username' => ['required', 'string'],
             'password' => ['required', 'string'],
+            'remember' => ['sometimes', 'boolean'],
         ]);
 
         $response = Http::acceptJson()
@@ -37,6 +39,12 @@ class AuthController extends Controller
             'user' => data_get($payload, 'data.user'),
         ]);
 
+        if ((bool) ($validated['remember'] ?? false)) {
+            AuthCookieManager::queueRememberCookie($request, (string) data_get($payload, 'data.access_token'));
+        } else {
+            AuthCookieManager::queueForgetRememberCookie();
+        }
+
         return response()->json([
             'message' => $this->extractMessage($payload, 'Login successful'),
             'redirect' => url($this->landingPageForRole((string) data_get($payload, 'data.user.role', ''))),
@@ -46,6 +54,10 @@ class AuthController extends Controller
 
     public function register(Request $request): JsonResponse
     {
+        return response()->json([
+            'message' => 'Public registration is disabled.',
+        ], 403);
+
         $validated = $request->validate([
             'username' => ['required', 'string', 'max:50'],
             'email' => ['required', 'string', 'email', 'max:150'],
@@ -90,6 +102,7 @@ class AuthController extends Controller
         $request->session()->forget('svs_auth');
         $request->session()->invalidate();
         $request->session()->regenerateToken();
+        AuthCookieManager::queueForgetRememberCookie();
 
         return redirect('/login');
     }

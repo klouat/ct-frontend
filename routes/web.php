@@ -32,7 +32,7 @@ Route::get('/login', function () {
 Route::post('/login', [AuthController::class, 'login']);
 
 Route::get('/register', function () {
-    return view('auth.register');
+    return redirect('/login');
 });
 
 Route::post('/register', [AuthController::class, 'register']);

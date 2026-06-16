@@ -65,38 +65,18 @@
                     <p id="passwordError" class="mt-2 hidden text-sm text-red-500"></p>
                 </div>
 
-                <!-- Remember + Forgot -->
-                <div class="flex items-center justify-between">
+                <!-- Remember -->
+                <div class="flex items-center">
                     <label class="flex items-center gap-2 text-sm text-gray-600 cursor-pointer">
-                        <input type="checkbox" class="w-4 h-4 rounded border-gray-300 text-blue-700 focus:ring-blue-500">
+                        <input type="checkbox" id="remember" class="w-4 h-4 rounded border-gray-300 text-blue-700 focus:ring-blue-500">
                         Remember me
                     </label>
-                    <a href="#" class="text-blue-800 font-bold text-sm hover:underline">Forgot Password ?</a>
                 </div>
 
                 <!-- Login Button -->
                 <button type="submit" class="w-full bg-[#0033ab] text-white py-3 rounded-xl font-bold text-lg hover:bg-blue-800 transition shadow-md">
                     Login
                 </button>
-
-                <!-- Divider -->
-                <div class="flex items-center py-2">
-                    <div class="flex-1 h-px bg-gray-200"></div>
-                    <span class="px-4 text-gray-400 text-sm">or</span>
-                    <div class="flex-1 h-px bg-gray-200"></div>
-                </div>
-
-                <!-- Scan Login -->
-                <button type="button" class="w-full border-2 border-blue-200 text-[#0033ab] py-3 rounded-xl font-bold flex items-center justify-center gap-2 hover:bg-blue-50 transition">
-                    <i data-lucide="scan" class="w-5 h-5"></i>
-                    Scan Login
-                </button>
-
-                <!-- Register -->
-                <div class="text-center pt-4">
-                    <p class="text-sm text-gray-600 mb-1">Don't have an account?</p>
-                    <a href="/register" class="text-blue-800 font-bold hover:underline">Register</a>
-                </div>
 
                 <!-- Error Message -->
                 <div id="errorSummary" class="hidden rounded-xl border border-red-200 bg-red-50 p-3 text-sm text-red-600">
@@ -209,6 +189,7 @@
 
             const username = document.getElementById('username').value.trim();
             const password = document.getElementById('password').value.trim();
+            const remember = document.getElementById('remember').checked;
             clearLoginErrors();
 
             if (!username || !password) {
@@ -236,7 +217,7 @@
                         'X-CSRF-TOKEN': csrfToken
                     },
                     credentials: 'same-origin',
-                    body: JSON.stringify({ username, password })
+                    body: JSON.stringify({ username, password, remember })
                 });
 
                 const data = await res.json();

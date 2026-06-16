@@ -14,29 +14,6 @@ class UserController extends Controller
         return view('dashboard.users');
     }
 
-    public function createPage()
-    {
-        return view('dashboard.user-form', [
-            'mode' => 'create',
-            'userId' => null,
-        ]);
-    }
-
-    public function editPage(int $id)
-    {
-        return view('dashboard.user-form', [
-            'mode' => 'edit',
-            'userId' => $id,
-        ]);
-    }
-
-    public function showPage(int $id)
-    {
-        return view('dashboard.user-show', [
-            'userId' => $id,
-        ]);
-    }
-
     public function list(Request $request): JsonResponse
     {
         return $this->forwardGet($request, '/api/users', [

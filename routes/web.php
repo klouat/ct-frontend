@@ -78,13 +78,10 @@ Route::delete('/vendors/{id}', [VendorController::class, 'destroy'])->middleware
 
 Route::get('/users', [UserController::class, 'indexPage'])->middleware('frontend.auth:ADMIN');
 Route::get('/users/data', [UserController::class, 'list'])->middleware('frontend.auth:ADMIN');
-Route::get('/users/create', [UserController::class, 'createPage'])->middleware('frontend.auth:ADMIN');
 Route::post('/users', [UserController::class, 'store'])->middleware('frontend.auth:ADMIN');
-Route::get('/users/{id}/edit', [UserController::class, 'editPage'])->middleware('frontend.auth:ADMIN');
 Route::put('/users/{id}', [UserController::class, 'update'])->middleware('frontend.auth:ADMIN');
 Route::get('/users/{id}/data', [UserController::class, 'details'])->middleware('frontend.auth:ADMIN');
 Route::delete('/users/{id}', [UserController::class, 'destroy'])->middleware('frontend.auth:ADMIN');
-Route::get('/users/{id}', [UserController::class, 'showPage'])->middleware('frontend.auth:ADMIN');
 
 Route::get('/history', function () {
     return view('dashboard.history');

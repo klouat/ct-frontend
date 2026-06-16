@@ -27,13 +27,14 @@
                     <i data-lucide="users" class="h-7 w-7"></i>
                     <h2 class="text-2xl font-bold text-gray-800">User Management</h2>
                 </div>
-                <a
-                    href="/users/create"
+                <button
+                    type="button"
+                    id="openCreateUserBtn"
                     class="flex items-center gap-2 rounded-xl bg-[#0033ab] px-5 py-3 font-bold text-white shadow-lg shadow-blue-100 transition hover:bg-blue-800"
                 >
                     <i data-lucide="user-plus" class="h-5 w-5"></i>
                     Add User
-                </a>
+                </button>
             </div>
 
             <div id="alertBanner" class="hidden rounded-xl border px-4 py-3 text-sm font-medium"></div>
@@ -128,6 +129,129 @@
         </div>
     </div>
 
+    <div id="viewUserModal" class="fixed inset-0 z-50 hidden items-center justify-center bg-slate-950/60 px-4 backdrop-blur-sm">
+        <div class="w-full max-w-3xl rounded-3xl bg-white shadow-2xl">
+            <div class="flex items-center justify-between border-b border-gray-100 px-6 py-5">
+                <div class="flex items-center gap-3 text-[#0033ab]">
+                    <i data-lucide="badge-info" class="h-6 w-6"></i>
+                    <div>
+                        <h3 class="text-xl font-black text-gray-800">User Details</h3>
+                        <p class="text-sm font-medium text-gray-400">Review account data without leaving the list.</p>
+                    </div>
+                </div>
+                <button type="button" data-close-modal="viewUserModal" class="rounded-xl p-2 text-gray-400 transition hover:bg-gray-100">
+                    <i data-lucide="x" class="h-5 w-5"></i>
+                </button>
+            </div>
+            <div class="p-6">
+                <div id="viewUserLoading" class="flex flex-col items-center gap-3 py-12 text-gray-400">
+                    <i data-lucide="loader-2" class="h-7 w-7 animate-spin text-blue-400"></i>
+                    Loading user details...
+                </div>
+                <div id="viewUserContent" class="hidden space-y-6">
+                    <div class="flex items-center gap-4">
+                        <div class="flex h-16 w-16 items-center justify-center rounded-2xl bg-blue-50 text-[#0033ab]">
+                            <i data-lucide="user-round" class="h-8 w-8"></i>
+                        </div>
+                        <div>
+                            <h4 id="viewUsername" class="text-2xl font-black text-gray-800"></h4>
+                            <p id="viewEmail" class="font-medium text-gray-400"></p>
+                        </div>
+                    </div>
+                    <div class="grid gap-4 md:grid-cols-2">
+                        <div class="rounded-2xl border border-gray-100 bg-[#f8fbff] p-5">
+                            <p class="text-xs font-black uppercase tracking-widest text-gray-400">Role</p>
+                            <p id="viewRole" class="mt-2 text-lg font-bold text-[#0033ab]"></p>
+                        </div>
+                        <div class="rounded-2xl border border-gray-100 bg-[#f8fbff] p-5">
+                            <p class="text-xs font-black uppercase tracking-widest text-gray-400">Vendor</p>
+                            <p id="viewVendor" class="mt-2 text-lg font-bold text-gray-800"></p>
+                        </div>
+                        <div class="rounded-2xl border border-gray-100 bg-[#f8fbff] p-5">
+                            <p class="text-xs font-black uppercase tracking-widest text-gray-400">User ID</p>
+                            <p id="viewUserId" class="mt-2 text-lg font-bold text-gray-800"></p>
+                        </div>
+                        <div class="rounded-2xl border border-gray-100 bg-[#f8fbff] p-5">
+                            <p class="text-xs font-black uppercase tracking-widest text-gray-400">Created At</p>
+                            <p id="viewCreatedAt" class="mt-2 text-lg font-bold text-gray-800"></p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="userFormModal" class="fixed inset-0 z-50 hidden items-center justify-center bg-slate-950/60 px-4 backdrop-blur-sm">
+        <div class="w-full max-w-4xl rounded-3xl bg-white shadow-2xl">
+            <div class="flex items-center justify-between border-b border-gray-100 px-6 py-5">
+                <div class="flex items-center gap-3 text-[#0033ab]">
+                    <i id="userFormIcon" data-lucide="user-plus" class="h-6 w-6"></i>
+                    <div>
+                        <h3 id="userFormTitle" class="text-xl font-black text-gray-800">Create User</h3>
+                        <p id="userFormSubtitle" class="text-sm font-medium text-gray-400">Create a new account with the correct role and access level.</p>
+                    </div>
+                </div>
+                <button type="button" data-close-modal="userFormModal" class="rounded-xl p-2 text-gray-400 transition hover:bg-gray-100">
+                    <i data-lucide="x" class="h-5 w-5"></i>
+                </button>
+            </div>
+            <div class="p-6 md:p-8">
+                <div id="userFormSummary" class="hidden rounded-xl border p-4 text-sm"></div>
+                <div id="userFormLoading" class="hidden flex-col items-center gap-3 py-12 text-gray-400">
+                    <i data-lucide="loader-2" class="h-7 w-7 animate-spin text-blue-400"></i>
+                    Loading user data...
+                </div>
+                <form id="userForm" class="space-y-6">
+                    <input type="hidden" id="formUserId">
+                    <div class="grid gap-6 md:grid-cols-2">
+                        <div>
+                            <label class="mb-2 block text-xs font-black uppercase tracking-widest text-gray-400">Username</label>
+                            <input id="username" type="text" maxlength="50" class="w-full rounded-xl border border-gray-200 bg-gray-50 px-4 py-3 font-medium focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#0033ab]">
+                            <p id="usernameError" class="mt-2 hidden text-xs font-medium text-red-500"></p>
+                        </div>
+                        <div>
+                            <label class="mb-2 block text-xs font-black uppercase tracking-widest text-gray-400">Email</label>
+                            <input id="email" type="email" maxlength="150" class="w-full rounded-xl border border-gray-200 bg-gray-50 px-4 py-3 font-medium focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#0033ab]">
+                            <p id="emailError" class="mt-2 hidden text-xs font-medium text-red-500"></p>
+                        </div>
+                        <div>
+                            <label class="mb-2 block text-xs font-black uppercase tracking-widest text-gray-400">Role</label>
+                            <select id="role" class="w-full rounded-xl border border-gray-200 bg-gray-50 px-4 py-3 font-medium focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#0033ab]">
+                                <option value="">Select role</option>
+                                <option value="ADMIN">ADMIN</option>
+                                <option value="SUPERVISOR">SUPERVISOR</option>
+                                <option value="PETUGAS_GUDANG">PETUGAS GUDANG</option>
+                                <option value="VENDOR">VENDOR</option>
+                            </select>
+                            <p id="roleError" class="mt-2 hidden text-xs font-medium text-red-500"></p>
+                        </div>
+                        <div id="vendorField" class="hidden">
+                            <label class="mb-2 block text-xs font-black uppercase tracking-widest text-gray-400">Vendor</label>
+                            <select id="vendor_id" class="w-full rounded-xl border border-gray-200 bg-gray-50 px-4 py-3 font-medium focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#0033ab]">
+                                <option value="">Select vendor</option>
+                            </select>
+                            <p id="vendorIdError" class="mt-2 hidden text-xs font-medium text-red-500"></p>
+                        </div>
+                        <div>
+                            <label id="passwordLabel" class="mb-2 block text-xs font-black uppercase tracking-widest text-gray-400">Password</label>
+                            <input id="password" type="password" minlength="8" class="w-full rounded-xl border border-gray-200 bg-gray-50 px-4 py-3 font-medium focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#0033ab]">
+                            <p id="passwordHint" class="mt-2 text-xs text-gray-400">Minimum 8 characters.</p>
+                            <p id="passwordError" class="mt-2 hidden text-xs font-medium text-red-500"></p>
+                        </div>
+                    </div>
+                    <div class="flex flex-col gap-3 border-t border-gray-100 pt-6 sm:flex-row">
+                        <button type="button" data-close-modal="userFormModal" class="rounded-xl border-2 border-gray-200 px-5 py-3 text-center font-bold text-gray-500 transition hover:bg-gray-50">
+                            Cancel
+                        </button>
+                        <button id="submitBtn" type="submit" class="rounded-xl bg-[#0033ab] px-5 py-3 font-bold text-white shadow-lg shadow-blue-100 transition hover:bg-blue-800">
+                            Create User
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
     <script>
         lucide.createIcons();
 
@@ -138,10 +262,32 @@
         const roleFilter = document.getElementById('roleFilter');
         const paginationInfo = document.getElementById('paginationInfo');
         const paginationControls = document.getElementById('paginationControls');
+        const userForm = document.getElementById('userForm');
+        const userFormSummary = document.getElementById('userFormSummary');
+        const userFormLoading = document.getElementById('userFormLoading');
+        const userFormState = {
+            mode: 'create',
+            userId: null,
+        };
+        const fieldMap = {
+            username: document.getElementById('username'),
+            email: document.getElementById('email'),
+            role: document.getElementById('role'),
+            vendor_id: document.getElementById('vendor_id'),
+            password: document.getElementById('password'),
+        };
+        const errorMap = {
+            username: document.getElementById('usernameError'),
+            email: document.getElementById('emailError'),
+            role: document.getElementById('roleError'),
+            vendor_id: document.getElementById('vendorIdError'),
+            password: document.getElementById('passwordError'),
+        };
 
         let currentPage = 1;
         let currentSearch = '';
         let currentRole = '';
+        let vendorOptionsLoaded = false;
 
         function showAlert(message, type = 'error') {
             const isError = type === 'error';
@@ -159,12 +305,16 @@
             const element = document.getElementById(id);
             element.classList.remove('hidden');
             element.classList.add('flex');
+            document.body.classList.add('overflow-hidden');
         }
 
         function closeModal(id) {
             const element = document.getElementById(id);
             element.classList.add('hidden');
             element.classList.remove('flex');
+            if (document.querySelectorAll('.fixed.inset-0.z-50.flex').length === 0) {
+                document.body.classList.remove('overflow-hidden');
+            }
         }
 
         function escapeHtml(value) {
@@ -273,16 +423,24 @@
                             </span>
                         </td>
                         <td class="px-6 py-4 font-medium text-gray-500">
-                            ${escapeHtml(user.vendor_name || '-')}
+                                ${escapeHtml(user.vendor_name || '-')}
                         </td>
                         <td class="px-6 py-4">
                             <div class="flex justify-end gap-2">
-                                <a href="/users/${user.user_id}" class="rounded-xl border border-gray-200 px-3 py-2 text-xs font-bold text-gray-600 transition hover:bg-gray-50">
+                                <button
+                                    type="button"
+                                    class="view-btn rounded-xl border border-gray-200 px-3 py-2 text-xs font-bold text-gray-600 transition hover:bg-gray-50"
+                                    data-id="${user.user_id}"
+                                >
                                     View
-                                </a>
-                                <a href="/users/${user.user_id}/edit" class="rounded-xl border border-blue-100 bg-blue-50 px-3 py-2 text-xs font-bold text-[#0033ab] transition hover:bg-blue-100">
+                                </button>
+                                <button
+                                    type="button"
+                                    class="edit-btn rounded-xl border border-blue-100 bg-blue-50 px-3 py-2 text-xs font-bold text-[#0033ab] transition hover:bg-blue-100"
+                                    data-id="${user.user_id}"
+                                >
                                     Edit
-                                </a>
+                                </button>
                                 <button
                                     type="button"
                                     class="delete-btn rounded-xl border border-red-100 bg-red-50 px-3 py-2 text-xs font-bold text-red-500 transition hover:bg-red-100"
@@ -310,6 +468,12 @@
                     document.getElementById('deleteUserName').textContent = button.dataset.name;
                     openModal('deleteModal');
                 });
+            });
+            tableBody.querySelectorAll('.view-btn').forEach((button) => {
+                button.addEventListener('click', () => openViewUserModal(button.dataset.id));
+            });
+            tableBody.querySelectorAll('.edit-btn').forEach((button) => {
+                button.addEventListener('click', () => openEditUserModal(button.dataset.id));
             });
         }
 
@@ -360,11 +524,290 @@
             loadUsers(1, searchInput.value.trim(), roleFilter.value);
         });
 
+        function clearFormErrors() {
+            Object.values(fieldMap).forEach((field) => {
+                field.classList.remove('border-red-400', 'ring-2', 'ring-red-100');
+                field.classList.add('border-gray-200');
+            });
+
+            Object.values(errorMap).forEach((errorNode) => {
+                errorNode.textContent = '';
+                errorNode.classList.add('hidden');
+            });
+
+            userFormSummary.className = 'hidden rounded-xl border p-4 text-sm';
+            userFormSummary.textContent = '';
+        }
+
+        function setFormError(fieldName, message) {
+            const field = errorMap[fieldName] ? fieldMap[fieldName] : null;
+            const errorNode = errorMap[fieldName];
+
+            if (!field || !errorNode || !message) {
+                return;
+            }
+
+            field.classList.remove('border-gray-200');
+            field.classList.add('border-red-400', 'ring-2', 'ring-red-100');
+            errorNode.textContent = message;
+            errorNode.classList.remove('hidden');
+        }
+
+        function showFormSummary(message, type = 'error') {
+            userFormSummary.className = 'rounded-xl border p-4 text-sm';
+            if (type === 'success') {
+                userFormSummary.classList.add('border-green-200', 'bg-green-50', 'text-green-700');
+            } else {
+                userFormSummary.classList.add('border-red-200', 'bg-red-50', 'text-red-600');
+            }
+            userFormSummary.textContent = message;
+        }
+
+        function toggleVendorField() {
+            const showVendor = fieldMap.role.value === 'VENDOR';
+            document.getElementById('vendorField').classList.toggle('hidden', !showVendor);
+        }
+
+        function resetUserForm() {
+            userForm.reset();
+            document.getElementById('formUserId').value = '';
+            toggleVendorField();
+            clearFormErrors();
+        }
+
+        function setUserFormMode(mode) {
+            userFormState.mode = mode;
+            const isEdit = mode === 'edit';
+
+            document.getElementById('userFormTitle').textContent = isEdit ? 'Edit User' : 'Create User';
+            document.getElementById('userFormSubtitle').textContent = isEdit
+                ? 'Update user account details and password if needed.'
+                : 'Create a new account with the correct role and access level.';
+            document.getElementById('userFormIcon').setAttribute('data-lucide', isEdit ? 'user-cog' : 'user-plus');
+            document.getElementById('passwordLabel').textContent = isEdit ? 'New Password' : 'Password';
+            document.getElementById('passwordHint').textContent = isEdit
+                ? 'Leave blank to keep the current password.'
+                : 'Minimum 8 characters.';
+            document.getElementById('submitBtn').textContent = isEdit ? 'Update User' : 'Create User';
+            fieldMap.password.required = !isEdit;
+            lucide.createIcons();
+        }
+
+        async function loadVendorOptions() {
+            if (vendorOptionsLoaded) {
+                return;
+            }
+
+            const response = await fetch('/vendors/options', {
+                headers: { 'Accept': 'application/json' },
+                credentials: 'same-origin',
+            });
+
+            if (response.status === 401) {
+                window.location.href = '/login';
+                return;
+            }
+
+            const payload = await response.json();
+
+            if (!response.ok) {
+                throw new Error(payload.message || 'Failed to load vendors');
+            }
+
+            const vendors = Array.isArray(payload.data) ? payload.data : [];
+            fieldMap.vendor_id.innerHTML = `
+                <option value="">Select vendor</option>
+                ${vendors.map((vendor) => `<option value="${vendor.vendor_id}">${escapeHtml(vendor.vendor_name)}</option>`).join('')}
+            `;
+            vendorOptionsLoaded = true;
+        }
+
+        async function fetchUserDetails(userId) {
+            const response = await fetch(`/users/${userId}/data`, {
+                headers: { 'Accept': 'application/json' },
+                credentials: 'same-origin',
+            });
+
+            if (response.status === 401) {
+                window.location.href = '/login';
+                return null;
+            }
+
+            const payload = await response.json();
+
+            if (!response.ok) {
+                throw new Error(payload.message || 'Failed to load user details');
+            }
+
+            return payload.data;
+        }
+
+        function formatDate(value) {
+            if (!value) {
+                return '-';
+            }
+
+            const date = new Date(value);
+
+            if (Number.isNaN(date.getTime())) {
+                return value;
+            }
+
+            return date.toLocaleString();
+        }
+
+        async function openViewUserModal(userId) {
+            openModal('viewUserModal');
+            document.getElementById('viewUserLoading').classList.remove('hidden');
+            document.getElementById('viewUserContent').classList.add('hidden');
+
+            try {
+                const user = await fetchUserDetails(userId);
+
+                if (!user) {
+                    return;
+                }
+
+                document.getElementById('viewUsername').textContent = user.username || '-';
+                document.getElementById('viewEmail').textContent = user.email || '-';
+                document.getElementById('viewRole').textContent = user.role || '-';
+                document.getElementById('viewVendor').textContent = user.vendor_name || '-';
+                document.getElementById('viewUserId').textContent = user.user_id || '-';
+                document.getElementById('viewCreatedAt').textContent = formatDate(user.created_at);
+
+                document.getElementById('viewUserLoading').classList.add('hidden');
+                document.getElementById('viewUserContent').classList.remove('hidden');
+            } catch (error) {
+                closeModal('viewUserModal');
+                showAlert(error.message || 'Failed to load user details');
+            }
+        }
+
+        async function openCreateUserModal() {
+            await loadVendorOptions();
+            userFormState.userId = null;
+            setUserFormMode('create');
+            resetUserForm();
+            openModal('userFormModal');
+        }
+
+        async function openEditUserModal(userId) {
+            openModal('userFormModal');
+            userFormLoading.classList.remove('hidden');
+            userFormLoading.classList.add('flex');
+            userForm.classList.add('hidden');
+
+            try {
+                await loadVendorOptions();
+                const user = await fetchUserDetails(userId);
+
+                if (!user) {
+                    return;
+                }
+
+                userFormState.userId = user.user_id;
+                setUserFormMode('edit');
+                resetUserForm();
+                document.getElementById('formUserId').value = user.user_id;
+                fieldMap.username.value = user.username || '';
+                fieldMap.email.value = user.email || '';
+                fieldMap.role.value = user.role || '';
+                toggleVendorField();
+                if (user.vendor_id) {
+                    fieldMap.vendor_id.value = String(user.vendor_id);
+                }
+
+                userFormLoading.classList.add('hidden');
+                userFormLoading.classList.remove('flex');
+                userForm.classList.remove('hidden');
+            } catch (error) {
+                userFormLoading.classList.add('hidden');
+                userFormLoading.classList.remove('flex');
+                closeModal('userFormModal');
+                showAlert(error.message || 'Failed to load user');
+            }
+        }
+
+        document.getElementById('openCreateUserBtn').addEventListener('click', async () => {
+            try {
+                userFormLoading.classList.add('hidden');
+                userFormLoading.classList.remove('flex');
+                userForm.classList.remove('hidden');
+                await openCreateUserModal();
+            } catch (error) {
+                showAlert(error.message || 'Failed to open user form');
+            }
+        });
+
+        fieldMap.role.addEventListener('change', toggleVendorField);
+
+        userForm.addEventListener('submit', async (event) => {
+            event.preventDefault();
+            clearFormErrors();
+
+            const payload = {
+                username: fieldMap.username.value.trim(),
+                email: fieldMap.email.value.trim(),
+                password: fieldMap.password.value,
+                role: fieldMap.role.value,
+                vendor_id: fieldMap.role.value === 'VENDOR' ? fieldMap.vendor_id.value : null,
+            };
+
+            const submitButton = document.getElementById('submitBtn');
+            const isEdit = userFormState.mode === 'edit';
+
+            submitButton.disabled = true;
+            submitButton.textContent = isEdit ? 'Updating...' : 'Creating...';
+
+            try {
+                const response = await fetch(isEdit ? `/users/${userFormState.userId}` : '/users', {
+                    method: isEdit ? 'PUT' : 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json',
+                        'X-CSRF-TOKEN': csrfToken,
+                    },
+                    credentials: 'same-origin',
+                    body: JSON.stringify(payload),
+                });
+                const result = await response.json();
+
+                if (!response.ok) {
+                    Object.entries(result.errors || {}).forEach(([field, messages]) => {
+                        if (Array.isArray(messages) && messages.length > 0) {
+                            setFormError(field, messages[0]);
+                        }
+                    });
+                    showFormSummary(result.message || 'Failed to save user');
+                    return;
+                }
+
+                closeModal('userFormModal');
+                showAlert(result.message || 'User saved successfully', 'success');
+                loadUsers(currentPage, currentSearch, currentRole);
+            } catch (error) {
+                showFormSummary(error.message || 'Failed to save user');
+            } finally {
+                submitButton.disabled = false;
+                submitButton.textContent = isEdit ? 'Update User' : 'Create User';
+            }
+        });
+
         document.getElementById('cancelDeleteBtn').addEventListener('click', () => closeModal('deleteModal'));
         document.getElementById('deleteModal').addEventListener('click', (event) => {
             if (event.target === event.currentTarget) {
                 closeModal('deleteModal');
             }
+        });
+        document.querySelectorAll('[data-close-modal]').forEach((button) => {
+            button.addEventListener('click', () => closeModal(button.dataset.closeModal));
+        });
+        ['viewUserModal', 'userFormModal'].forEach((modalId) => {
+            document.getElementById(modalId).addEventListener('click', (event) => {
+                if (event.target === event.currentTarget) {
+                    closeModal(modalId);
+                }
+            });
         });
 
         document.getElementById('confirmDeleteBtn').addEventListener('click', async () => {

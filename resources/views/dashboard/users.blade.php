@@ -12,8 +12,8 @@
     @include('dashboard.partials.sidebar', ['activePage' => 'users'])
 
     <div class="flex min-h-screen flex-grow flex-col">
-        <header class="z-10 flex items-center justify-between bg-white px-8 py-4 shadow-sm">
-            <h1 class="text-xl font-bold tracking-tight text-[#0033ab]">EPSON Smart Verification System (SVS)</h1>
+        <header class="z-10 flex items-center justify-between bg-white px-4 py-4 shadow-sm md:px-8">
+            <h1 class="text-base font-bold tracking-tight text-[#0033ab] md:text-xl">EPSON Smart Verification System (SVS)</h1>
             <div class="lg:hidden">
                 <button type="button" data-open-mobile-sidebar class="p-2 text-gray-600">
                     <i data-lucide="menu" class="h-6 w-6"></i>
@@ -30,7 +30,7 @@
                 <button
                     type="button"
                     id="openCreateUserBtn"
-                    class="flex items-center gap-2 rounded-xl bg-[#0033ab] px-5 py-3 font-bold text-white shadow-lg shadow-blue-100 transition hover:bg-blue-800"
+                    class="flex w-full items-center justify-center gap-2 rounded-xl bg-[#0033ab] px-5 py-3 font-bold text-white shadow-lg shadow-blue-100 transition hover:bg-blue-800 sm:w-auto"
                 >
                     <i data-lucide="user-plus" class="h-5 w-5"></i>
                     Add User
@@ -40,7 +40,7 @@
             <div id="alertBanner" class="hidden rounded-xl border px-4 py-3 text-sm font-medium"></div>
 
             <div class="overflow-hidden rounded-3xl border border-blue-50 bg-white shadow-sm">
-                <div class="flex flex-col gap-3 border-b border-gray-100 p-5 lg:flex-row lg:items-center">
+                <div class="flex flex-col gap-3 border-b border-gray-100 p-4 sm:p-5 lg:flex-row lg:items-center">
                     <div class="relative flex-grow">
                         <i data-lucide="search" class="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400"></i>
                         <input
@@ -52,7 +52,7 @@
                     </div>
                     <select
                         id="roleFilter"
-                        class="rounded-xl border border-gray-200 bg-gray-50 px-4 py-3 text-sm font-medium focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#0033ab]"
+                        class="w-full rounded-xl border border-gray-200 bg-gray-50 px-4 py-3 text-sm font-medium focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#0033ab] lg:w-auto"
                     >
                         <option value="">All roles</option>
                         <option value="ADMIN">ADMIN</option>
@@ -62,14 +62,20 @@
                     </select>
                     <button
                         id="searchBtn"
-                        class="flex items-center justify-center gap-2 rounded-xl bg-blue-50 px-5 py-3 text-sm font-bold text-[#0033ab] transition hover:bg-blue-100"
+                        class="flex w-full items-center justify-center gap-2 rounded-xl bg-blue-50 px-5 py-3 text-sm font-bold text-[#0033ab] transition hover:bg-blue-100 lg:w-auto"
                     >
                         <i data-lucide="filter" class="h-4 w-4"></i>
                         Filter
                     </button>
                 </div>
 
-                <div class="overflow-x-auto">
+                <div id="mobileUserCards" class="space-y-3 p-4 sm:hidden">
+                    <div class="rounded-2xl border border-dashed border-gray-200 px-4 py-8 text-center text-sm font-medium text-gray-400">
+                        Loading users...
+                    </div>
+                </div>
+
+                <div class="hidden overflow-x-auto sm:block">
                     <table class="w-full text-sm">
                         <thead class="bg-[#f8faff] text-xs font-black uppercase tracking-widest text-gray-400">
                             <tr>
@@ -234,7 +240,18 @@
                         </div>
                         <div>
                             <label id="passwordLabel" class="mb-2 block text-xs font-black uppercase tracking-widest text-gray-400">Password</label>
-                            <input id="password" type="password" minlength="8" class="w-full rounded-xl border border-gray-200 bg-gray-50 px-4 py-3 font-medium focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#0033ab]">
+                            <div class="relative">
+                                <input id="password" type="password" minlength="8" class="w-full rounded-xl border border-gray-200 bg-gray-50 px-4 py-3 pr-14 font-medium focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#0033ab]">
+                                <button
+                                    type="button"
+                                    id="togglePasswordVisibility"
+                                    class="absolute inset-y-0 right-3 flex items-center text-sm font-bold text-[#0033ab] transition hover:text-blue-800"
+                                    aria-label="Show password"
+                                    aria-pressed="false"
+                                >
+                                    Show
+                                </button>
+                            </div>
                             <p id="passwordHint" class="mt-2 text-xs text-gray-400">Minimum 8 characters.</p>
                             <p id="passwordError" class="mt-2 hidden text-xs font-medium text-red-500"></p>
                         </div>
@@ -260,6 +277,7 @@
         const alertBanner = document.getElementById('alertBanner');
         const searchInput = document.getElementById('searchInput');
         const roleFilter = document.getElementById('roleFilter');
+        const mobileUserCards = document.getElementById('mobileUserCards');
         const paginationInfo = document.getElementById('paginationInfo');
         const paginationControls = document.getElementById('paginationControls');
         const userForm = document.getElementById('userForm');
@@ -283,6 +301,7 @@
             vendor_id: document.getElementById('vendorIdError'),
             password: document.getElementById('passwordError'),
         };
+        const passwordToggleButton = document.getElementById('togglePasswordVisibility');
 
         let currentPage = 1;
         let currentSearch = '';
@@ -341,6 +360,11 @@
                     </td>
                 </tr>
             `;
+            mobileUserCards.innerHTML = `
+                <div class="rounded-2xl border border-dashed border-gray-200 px-4 py-8 text-center text-sm font-medium text-gray-400">
+                    Loading users...
+                </div>
+            `;
             lucide.createIcons();
 
             try {
@@ -394,6 +418,14 @@
                             </div>
                         </td>
                     </tr>
+                `;
+                mobileUserCards.innerHTML = `
+                    <div class="rounded-2xl border border-dashed border-gray-200 px-4 py-8 text-center text-sm font-medium text-gray-400">
+                        <div class="flex flex-col items-center gap-2">
+                            <i data-lucide="users" class="h-8 w-8 text-gray-300"></i>
+                            No users found.
+                        </div>
+                    </div>
                 `;
                 paginationInfo.textContent = '';
                 paginationControls.innerHTML = '';
@@ -455,6 +487,55 @@
                 `;
             }).join('');
 
+            mobileUserCards.innerHTML = items.map((user) => `
+                <div class="rounded-2xl border border-blue-50 bg-[#fbfdff] p-4 shadow-sm">
+                    <div class="flex items-start justify-between gap-3">
+                        <div class="flex min-w-0 items-center gap-3">
+                            <div class="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-blue-50 text-[#0033ab]">
+                                <i data-lucide="user-round" class="h-4 w-4"></i>
+                            </div>
+                            <div class="min-w-0">
+                                <p class="truncate font-bold text-gray-800">${escapeHtml(user.username)}</p>
+                                <p class="truncate text-xs text-gray-400">${escapeHtml(user.email)}</p>
+                            </div>
+                        </div>
+                        <span class="shrink-0 rounded-full bg-blue-50 px-3 py-1 text-[11px] font-bold text-[#0033ab]">
+                            ${escapeHtml(user.role)}
+                        </span>
+                    </div>
+                    <div class="mt-4 rounded-xl bg-white px-3 py-3 text-sm">
+                        <div class="flex items-center justify-between gap-3">
+                            <span class="text-xs font-black uppercase tracking-widest text-gray-400">Vendor</span>
+                            <span class="truncate font-medium text-gray-600">${escapeHtml(user.vendor_name || '-')}</span>
+                        </div>
+                    </div>
+                    <div class="mt-4 grid grid-cols-3 gap-2">
+                        <button
+                            type="button"
+                            class="view-btn rounded-xl border border-gray-200 px-3 py-2 text-xs font-bold text-gray-600 transition hover:bg-gray-50"
+                            data-id="${user.user_id}"
+                        >
+                            View
+                        </button>
+                        <button
+                            type="button"
+                            class="edit-btn rounded-xl border border-blue-100 bg-blue-50 px-3 py-2 text-xs font-bold text-[#0033ab] transition hover:bg-blue-100"
+                            data-id="${user.user_id}"
+                        >
+                            Edit
+                        </button>
+                        <button
+                            type="button"
+                            class="delete-btn rounded-xl border border-red-100 bg-red-50 px-3 py-2 text-xs font-bold text-red-500 transition hover:bg-red-100"
+                            data-id="${user.user_id}"
+                            data-name="${escapeHtml(user.username)}"
+                        >
+                            Delete
+                        </button>
+                    </div>
+                </div>
+            `).join('');
+
             const from = items.length === 0 ? 0 : ((meta.current_page - 1) * meta.per_page) + 1;
             const to = ((meta.current_page - 1) * meta.per_page) + items.length;
 
@@ -462,17 +543,17 @@
             renderPagination(meta.current_page, meta.last_page);
             lucide.createIcons();
 
-            tableBody.querySelectorAll('.delete-btn').forEach((button) => {
+            document.querySelectorAll('.delete-btn').forEach((button) => {
                 button.addEventListener('click', () => {
                     document.getElementById('deleteUserId').value = button.dataset.id;
                     document.getElementById('deleteUserName').textContent = button.dataset.name;
                     openModal('deleteModal');
                 });
             });
-            tableBody.querySelectorAll('.view-btn').forEach((button) => {
+            document.querySelectorAll('.view-btn').forEach((button) => {
                 button.addEventListener('click', () => openViewUserModal(button.dataset.id));
             });
-            tableBody.querySelectorAll('.edit-btn').forEach((button) => {
+            document.querySelectorAll('.edit-btn').forEach((button) => {
                 button.addEventListener('click', () => openEditUserModal(button.dataset.id));
             });
         }
@@ -571,6 +652,10 @@
         function resetUserForm() {
             userForm.reset();
             document.getElementById('formUserId').value = '';
+            fieldMap.password.type = 'password';
+            passwordToggleButton.textContent = 'Show';
+            passwordToggleButton.setAttribute('aria-label', 'Show password');
+            passwordToggleButton.setAttribute('aria-pressed', 'false');
             toggleVendorField();
             clearFormErrors();
         }
@@ -740,6 +825,14 @@
         });
 
         fieldMap.role.addEventListener('change', toggleVendorField);
+        passwordToggleButton.addEventListener('click', () => {
+            const isHidden = fieldMap.password.type === 'password';
+
+            fieldMap.password.type = isHidden ? 'text' : 'password';
+            passwordToggleButton.textContent = isHidden ? 'Hide' : 'Show';
+            passwordToggleButton.setAttribute('aria-label', isHidden ? 'Hide password' : 'Show password');
+            passwordToggleButton.setAttribute('aria-pressed', isHidden ? 'true' : 'false');
+        });
 
         userForm.addEventListener('submit', async (event) => {
             event.preventDefault();

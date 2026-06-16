@@ -85,9 +85,9 @@ Route::delete('/users/{id}', [UserController::class, 'destroy'])->middleware('fr
 
 Route::get('/history', function () {
     return view('dashboard.history');
-})->middleware('frontend.auth:ADMIN');
+})->middleware('frontend.auth:ADMIN,SUPERVISOR');
 
-Route::get('/history/data', [HistoryController::class, 'index'])->middleware('frontend.auth:ADMIN');
+Route::get('/history/data', [HistoryController::class, 'index'])->middleware('frontend.auth:ADMIN,SUPERVISOR');
 Route::get('/audit-logs', function () {
     return view('dashboard.audit-logs');
 })->middleware('frontend.auth:ADMIN,SUPERVISOR');

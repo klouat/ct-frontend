@@ -5,6 +5,7 @@
     $navigationItems = match ($userRole) {
         'SUPERVISOR' => [
             ['key' => 'home', 'label' => 'Dashboard', 'icon' => 'layout-grid', 'href' => '/home'],
+            ['key' => 'history', 'label' => 'History', 'icon' => 'history', 'href' => '/history'],
             ['key' => 'audit-logs', 'label' => 'Audit Logs', 'icon' => 'scroll-text', 'href' => '/audit-logs'],
         ],
         'PETUGAS_GUDANG' => [

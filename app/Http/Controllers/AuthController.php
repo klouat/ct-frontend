@@ -164,7 +164,7 @@ class AuthController extends Controller
     {
         return match ($role) {
             'PETUGAS_GUDANG' => '/scan',
-            'VENDOR' => '/invoice-barcodes',
+            'VENDOR' => '/invoice-qr',
             'ADMIN', 'SUPERVISOR' => '/home',
             default => '/login',
         };

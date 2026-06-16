@@ -12,7 +12,7 @@
             ['key' => 'scan', 'label' => 'Scanner', 'icon' => 'scan', 'href' => '/scan'],
         ],
         'VENDOR' => [
-            ['key' => 'invoice-barcodes', 'label' => 'QR Preview', 'icon' => 'qr-code', 'href' => '/invoice-barcodes'],
+            ['key' => 'invoice-barcodes', 'label' => 'Invoices', 'icon' => 'qr-code', 'href' => '/invoice-qr'],
         ],
         default => [
             ['key' => 'home',    'label' => 'Dashboard',     'icon' => 'layout-grid', 'href' => '/home'],

@@ -65,7 +65,7 @@
     <script>
         lucide.createIcons();
 
-        const DATA_URL = '/invoice-barcodes/data';
+        const DATA_URL = '/invoice-qr/data';
         const ACTIVITY_LOG_URL = '/activity-log';
         const barcodeList = document.getElementById('barcodeList');
         const pageMessage = document.getElementById('pageMessage');
@@ -231,7 +231,7 @@
 
         async function acceptInvoice(id) {
             try {
-                const response = await fetch('/invoice-barcodes/accept/' + id, {
+                const response = await fetch('/invoice-qr/accept/' + id, {
                     method: 'POST',
                     headers: { 'X-CSRF-TOKEN': '{{ csrf_token() }}' },
                     credentials: 'same-origin'
@@ -246,7 +246,7 @@
 
         async function rejectInvoice(id) {
             try {
-                const response = await fetch('/invoice-barcodes/reject/' + id, {
+                const response = await fetch('/invoice-qr/reject/' + id, {
                     method: 'POST',
                     headers: { 'X-CSRF-TOKEN': '{{ csrf_token() }}' },
                     credentials: 'same-origin'

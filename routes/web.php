@@ -16,7 +16,7 @@ Route::get('/', function () {
     if (session()->has('svs_auth.access_token')) {
         return redirect(match ((string) session('svs_auth.user.role', '')) {
             'PETUGAS_GUDANG' => '/scan',
-            'VENDOR' => '/invoice-barcodes',
+            'VENDOR' => '/invoice-qr',
             'ADMIN', 'SUPERVISOR' => '/home',
             default => '/login',
         });
@@ -58,12 +58,12 @@ Route::post('/scan/invoices/{invoice}/complete', [ScanController::class, 'comple
 Route::get('/invoice', function () {
     return view('dashboard.invoice');
 })->middleware('frontend.auth:ADMIN');
-Route::get('/invoice-barcodes', function () {
+Route::get('/invoice-qr', function () {
     return view('dashboard.invoice-barcodes');
 })->middleware('frontend.auth:VENDOR');
-Route::get('/invoice-barcodes/data', [InvoiceBarcodeController::class, 'index'])->middleware('frontend.auth:VENDOR');
-Route::post('/invoice-barcodes/accept/{id}', [InvoiceBarcodeController::class, 'accept'])->middleware('frontend.auth:VENDOR');
-Route::post('/invoice-barcodes/reject/{id}', [InvoiceBarcodeController::class, 'reject'])->middleware('frontend.auth:VENDOR');
+Route::get('/invoice-qr/data', [InvoiceBarcodeController::class, 'index'])->middleware('frontend.auth:VENDOR');
+Route::post('/invoice-qr/accept/{id}', [InvoiceBarcodeController::class, 'accept'])->middleware('frontend.auth:VENDOR');
+Route::post('/invoice-qr/reject/{id}', [InvoiceBarcodeController::class, 'reject'])->middleware('frontend.auth:VENDOR');
 
 Route::post('/invoice', [InvoiceController::class, 'store'])->middleware('frontend.auth:ADMIN');
 Route::get('/vendors/options', [VendorController::class, 'index'])->middleware('frontend.auth:ADMIN');

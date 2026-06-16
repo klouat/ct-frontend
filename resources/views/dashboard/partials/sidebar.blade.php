@@ -16,6 +16,7 @@
         default => [
             ['key' => 'home',    'label' => 'Dashboard',     'icon' => 'layout-grid', 'href' => '/home'],
             ['key' => 'invoice', 'label' => 'Input Invoice', 'icon' => 'file-text',   'href' => '/invoice'],
+            ['key' => 'users', 'label' => 'User Management', 'icon' => 'users', 'href' => '/users'],
             ['key' => 'vendors', 'label' => 'Vendors',       'icon' => 'building-2',  'href' => '/vendors'],
             ['key' => 'history', 'label' => 'History',       'icon' => 'history',     'href' => '/history'],
             ['key' => 'audit-logs', 'label' => 'Audit Logs', 'icon' => 'scroll-text', 'href' => '/audit-logs'],

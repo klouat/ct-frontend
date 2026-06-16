@@ -8,6 +8,7 @@ use App\Http\Controllers\HistoryController;
 use App\Http\Controllers\InvoiceBarcodeController;
 use App\Http\Controllers\InvoiceController;
 use App\Http\Controllers\ScanController;
+use App\Http\Controllers\UserController;
 use App\Http\Controllers\VendorController;
 use Illuminate\Support\Facades\Route;
 
@@ -74,6 +75,16 @@ Route::get('/vendors/data', [VendorController::class, 'list'])->middleware('fron
 Route::post('/vendors', [VendorController::class, 'store'])->middleware('frontend.auth:ADMIN');
 Route::put('/vendors/{id}', [VendorController::class, 'update'])->middleware('frontend.auth:ADMIN');
 Route::delete('/vendors/{id}', [VendorController::class, 'destroy'])->middleware('frontend.auth:ADMIN');
+
+Route::get('/users', [UserController::class, 'indexPage'])->middleware('frontend.auth:ADMIN');
+Route::get('/users/data', [UserController::class, 'list'])->middleware('frontend.auth:ADMIN');
+Route::get('/users/create', [UserController::class, 'createPage'])->middleware('frontend.auth:ADMIN');
+Route::post('/users', [UserController::class, 'store'])->middleware('frontend.auth:ADMIN');
+Route::get('/users/{id}/edit', [UserController::class, 'editPage'])->middleware('frontend.auth:ADMIN');
+Route::put('/users/{id}', [UserController::class, 'update'])->middleware('frontend.auth:ADMIN');
+Route::get('/users/{id}/data', [UserController::class, 'details'])->middleware('frontend.auth:ADMIN');
+Route::delete('/users/{id}', [UserController::class, 'destroy'])->middleware('frontend.auth:ADMIN');
+Route::get('/users/{id}', [UserController::class, 'showPage'])->middleware('frontend.auth:ADMIN');
 
 Route::get('/history', function () {
     return view('dashboard.history');

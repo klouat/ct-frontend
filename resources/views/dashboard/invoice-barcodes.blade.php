@@ -13,8 +13,8 @@
     @include('dashboard.partials.sidebar', ['activePage' => 'invoice-barcodes'])
 
     <div class="flex-grow flex min-h-screen flex-col">
-        <header class="bg-white py-4 px-8 shadow-sm flex justify-between items-center">
-            <h1 class="text-[#0033ab] text-xl font-bold">EPSON Smart Verification System (SVS)</h1>
+        <header class="bg-white py-4 px-4 md:px-8 shadow-sm flex justify-between items-center">
+            <h1 class="text-[#0033ab] text-base md:text-xl font-bold">EPSON Smart Verification System (SVS)</h1>
             <div class="lg:hidden">
                 <button id="menuBtn" data-open-mobile-sidebar><i data-lucide="menu"></i></button>
             </div>
@@ -39,13 +39,13 @@
         </main>
 
         <!-- Detail Modal -->
-        <div id="detailModal" class="fixed inset-0 z-50 hidden items-center justify-center bg-black/50 p-4">
-            <div class="w-full max-w-md rounded-2xl bg-white p-6 shadow-xl">
+        <div id="detailModal" class="fixed inset-0 z-50 hidden items-end sm:items-center justify-center bg-black/50 p-3 sm:p-4">
+            <div class="w-full max-w-md max-h-[calc(100vh-1.5rem)] overflow-y-auto rounded-2xl bg-white p-5 sm:p-6 shadow-xl">
                 <h3 class="text-xl font-bold text-[#001a4d]">Invoice Details</h3>
                 <div id="modalContent" class="mt-4 space-y-3 text-sm text-gray-700">
                     <!-- populated via js -->
                 </div>
-                <div id="modalActions" class="mt-6 flex justify-end gap-3">
+                <div id="modalActions" class="mt-6 flex flex-col-reverse sm:flex-row justify-end gap-3">
                     <button type="button" onclick="closeDetailModal()" class="rounded-xl bg-gray-200 px-4 py-2 font-bold text-gray-700 hover:bg-gray-300">Close</button>
                 </div>
             </div>
@@ -220,11 +220,13 @@
             document.getElementById('modalActions').innerHTML = btnHtml;
             document.getElementById('detailModal').classList.remove('hidden');
             document.getElementById('detailModal').classList.add('flex');
+            document.body.classList.add('overflow-hidden');
         }
 
         function closeDetailModal() {
             document.getElementById('detailModal').classList.add('hidden');
             document.getElementById('detailModal').classList.remove('flex');
+            document.body.classList.remove('overflow-hidden');
         }
 
         async function acceptInvoice(id) {
@@ -326,6 +328,11 @@
             action: 'VIEW_INVOICE_BARCODE_PAGE',
             table_name: 'pages',
             description: 'Opened print invoice QR page',
+        });
+        document.getElementById('detailModal').addEventListener('click', (event) => {
+            if (event.target === event.currentTarget) {
+                closeDetailModal();
+            }
         });
         loadInvoices();
     </script>

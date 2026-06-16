@@ -114,8 +114,8 @@
         </footer>
     </div>
 
-    <div id="deleteModal" class="fixed inset-0 z-50 hidden items-center justify-center bg-slate-950/60 px-4 backdrop-blur-sm">
-        <div class="w-full max-w-sm rounded-3xl bg-white p-8 text-center shadow-2xl">
+    <div id="deleteModal" class="fixed inset-0 z-50 hidden items-end justify-center bg-slate-950/60 px-3 py-3 backdrop-blur-sm sm:items-center sm:px-4">
+        <div class="max-h-[calc(100vh-1.5rem)] w-full max-w-sm overflow-y-auto rounded-3xl bg-white p-6 text-center shadow-2xl sm:p-8">
             <div class="mx-auto mb-5 flex h-16 w-16 items-center justify-center rounded-full bg-red-50 text-red-500">
                 <i data-lucide="trash-2" class="h-8 w-8"></i>
             </div>
@@ -135,11 +135,11 @@
         </div>
     </div>
 
-    <div id="viewUserModal" class="fixed inset-0 z-50 hidden items-center justify-center bg-slate-950/60 px-4 backdrop-blur-sm">
-        <div class="w-full max-w-3xl rounded-3xl bg-white shadow-2xl">
-            <div class="flex items-center justify-between border-b border-gray-100 px-6 py-5">
+    <div id="viewUserModal" class="fixed inset-0 z-50 hidden items-end justify-center bg-slate-950/60 px-3 py-3 backdrop-blur-sm sm:items-center sm:px-4">
+        <div class="flex max-h-[calc(100vh-1.5rem)] w-full max-w-3xl flex-col overflow-hidden rounded-3xl bg-white shadow-2xl sm:max-h-[90vh]">
+            <div class="flex items-start justify-between gap-3 border-b border-gray-100 px-4 py-4 sm:items-center sm:px-6 sm:py-5">
                 <div class="flex items-center gap-3 text-[#0033ab]">
-                    <i data-lucide="badge-info" class="h-6 w-6"></i>
+                    <i data-lucide="badge-info" class="mt-0.5 h-6 w-6 shrink-0 sm:mt-0"></i>
                     <div>
                         <h3 class="text-xl font-black text-gray-800">User Details</h3>
                         <p class="text-sm font-medium text-gray-400">Review account data without leaving the list.</p>
@@ -149,19 +149,19 @@
                     <i data-lucide="x" class="h-5 w-5"></i>
                 </button>
             </div>
-            <div class="p-6">
+            <div class="overflow-y-auto p-4 sm:p-6">
                 <div id="viewUserLoading" class="flex flex-col items-center gap-3 py-12 text-gray-400">
                     <i data-lucide="loader-2" class="h-7 w-7 animate-spin text-blue-400"></i>
                     Loading user details...
                 </div>
                 <div id="viewUserContent" class="hidden space-y-6">
-                    <div class="flex items-center gap-4">
+                    <div class="flex items-start gap-4 sm:items-center">
                         <div class="flex h-16 w-16 items-center justify-center rounded-2xl bg-blue-50 text-[#0033ab]">
                             <i data-lucide="user-round" class="h-8 w-8"></i>
                         </div>
-                        <div>
-                            <h4 id="viewUsername" class="text-2xl font-black text-gray-800"></h4>
-                            <p id="viewEmail" class="font-medium text-gray-400"></p>
+                        <div class="min-w-0">
+                            <h4 id="viewUsername" class="break-words text-xl font-black text-gray-800 sm:text-2xl"></h4>
+                            <p id="viewEmail" class="break-all font-medium text-gray-400"></p>
                         </div>
                     </div>
                     <div class="grid gap-4 md:grid-cols-2">
@@ -187,11 +187,11 @@
         </div>
     </div>
 
-    <div id="userFormModal" class="fixed inset-0 z-50 hidden items-center justify-center bg-slate-950/60 px-4 backdrop-blur-sm">
-        <div class="w-full max-w-4xl rounded-3xl bg-white shadow-2xl">
-            <div class="flex items-center justify-between border-b border-gray-100 px-6 py-5">
+    <div id="userFormModal" class="fixed inset-0 z-50 hidden items-end justify-center bg-slate-950/60 px-3 py-3 backdrop-blur-sm sm:items-center sm:px-4">
+        <div class="flex max-h-[calc(100vh-1.5rem)] w-full max-w-4xl flex-col overflow-hidden rounded-3xl bg-white shadow-2xl sm:max-h-[90vh]">
+            <div class="flex items-start justify-between gap-3 border-b border-gray-100 px-4 py-4 sm:items-center sm:px-6 sm:py-5">
                 <div class="flex items-center gap-3 text-[#0033ab]">
-                    <i id="userFormIcon" data-lucide="user-plus" class="h-6 w-6"></i>
+                    <i id="userFormIcon" data-lucide="user-plus" class="mt-0.5 h-6 w-6 shrink-0 sm:mt-0"></i>
                     <div>
                         <h3 id="userFormTitle" class="text-xl font-black text-gray-800">Create User</h3>
                         <p id="userFormSubtitle" class="text-sm font-medium text-gray-400">Create a new account with the correct role and access level.</p>
@@ -201,7 +201,7 @@
                     <i data-lucide="x" class="h-5 w-5"></i>
                 </button>
             </div>
-            <div class="p-6 md:p-8">
+            <div class="overflow-y-auto p-4 sm:p-6 md:p-8">
                 <div id="userFormSummary" class="hidden rounded-xl border p-4 text-sm"></div>
                 <div id="userFormLoading" class="hidden flex-col items-center gap-3 py-12 text-gray-400">
                     <i data-lucide="loader-2" class="h-7 w-7 animate-spin text-blue-400"></i>
@@ -209,7 +209,7 @@
                 </div>
                 <form id="userForm" class="space-y-6">
                     <input type="hidden" id="formUserId">
-                    <div class="grid gap-6 md:grid-cols-2">
+                    <div class="grid gap-5 sm:gap-6 md:grid-cols-2">
                         <div>
                             <label class="mb-2 block text-xs font-black uppercase tracking-widest text-gray-400">Username</label>
                             <input id="username" type="text" maxlength="50" class="w-full rounded-xl border border-gray-200 bg-gray-50 px-4 py-3 font-medium focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#0033ab]">

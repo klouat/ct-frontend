@@ -12,8 +12,8 @@
     @include('dashboard.partials.sidebar', ['activePage' => 'audit-logs'])
 
     <div class="flex-grow flex min-h-screen flex-col">
-        <header class="bg-white py-4 px-8 shadow-sm flex justify-between items-center">
-            <h1 class="text-[#0033ab] text-xl font-bold">EPSON Smart Verification System (SVS)</h1>
+        <header class="flex justify-between items-center bg-white py-4 px-4 md:px-8 shadow-sm">
+            <h1 class="text-[#0033ab] text-base md:text-xl font-bold">EPSON Smart Verification System (SVS)</h1>
             <div class="lg:hidden">
                 <button data-open-mobile-sidebar class="p-2 text-gray-600"><i data-lucide="menu"></i></button>
             </div>
@@ -26,7 +26,7 @@
                         <h2 class="text-3xl font-black text-[#001a4d]">Audit Logs</h2>
                         <p class="mt-1 text-sm font-medium text-gray-500">Track login, invoice, scan, vendor, shipment, and other system actions.</p>
                     </div>
-                    <div class="rounded-2xl border border-blue-100 bg-white px-4 py-3 text-sm font-semibold text-gray-500 shadow-sm">
+                    <div class="w-full md:w-auto rounded-2xl border border-blue-100 bg-white px-4 py-3 text-sm font-semibold text-gray-500 shadow-sm">
                         <span id="logCount">0 records</span>
                     </div>
                 </div>
@@ -63,7 +63,12 @@
                 <p id="pageMessage" class="hidden rounded-xl border px-4 py-3 text-sm font-medium"></p>
 
                 <section class="overflow-hidden rounded-3xl border border-blue-50 bg-white shadow-sm">
-                    <div class="overflow-x-auto">
+                    <div id="logsMobileList" class="space-y-3 p-4 md:hidden">
+                        <div class="rounded-2xl border border-dashed border-gray-200 px-4 py-8 text-center text-sm font-medium text-gray-400">
+                            Loading audit logs...
+                        </div>
+                    </div>
+                    <div class="hidden overflow-x-auto md:block">
                         <table class="min-w-full divide-y divide-blue-100">
                             <thead class="bg-[#f8fbff]">
                                 <tr class="text-left text-xs font-black uppercase tracking-wider text-gray-500">
@@ -107,6 +112,7 @@
         const activityLogUrl = '/activity-log';
         const pageMessage = document.getElementById('pageMessage');
         const logsTableBody = document.getElementById('logsTableBody');
+        const logsMobileList = document.getElementById('logsMobileList');
         const paginationSummary = document.getElementById('paginationSummary');
         const pageNumberList = document.getElementById('pageNumberList');
         const logCount = document.getElementById('logCount');
@@ -222,6 +228,11 @@
                         <td colspan="5" class="px-5 py-8 text-center text-sm font-medium text-gray-400">No audit logs found for the selected filters.</td>
                     </tr>
                 `;
+                logsMobileList.innerHTML = `
+                    <div class="rounded-2xl border border-dashed border-gray-200 px-4 py-8 text-center text-sm font-medium text-gray-400">
+                        No audit logs found for the selected filters.
+                    </div>
+                `;
                 return;
             }
 
@@ -240,6 +251,35 @@
                     </td>
                     <td class="px-5 py-4 text-sm text-gray-600">${item.description ?? '-'}</td>
                 </tr>
+            `).join('');
+
+            logsMobileList.innerHTML = items.map((item) => `
+                <div class="rounded-2xl border border-blue-50 bg-[#fbfdff] p-4 shadow-sm">
+                    <div class="flex items-start justify-between gap-3">
+                        <div class="min-w-0">
+                            <p class="text-[11px] font-black uppercase tracking-widest text-gray-400">Action</p>
+                            <p class="mt-1 break-words font-bold text-[#0033ab]">${item.action ?? '-'}</p>
+                        </div>
+                        <span class="shrink-0 rounded-full bg-blue-50 px-3 py-1 text-[11px] font-bold uppercase tracking-wide text-[#0033ab]">
+                            ${item.table_name ?? '-'}
+                        </span>
+                    </div>
+                    <div class="mt-4 space-y-3 rounded-xl bg-white p-3 text-sm">
+                        <div>
+                            <p class="text-[11px] font-black uppercase tracking-widest text-gray-400">Time</p>
+                            <p class="mt-1 font-medium text-gray-600">${formatTimestamp(item.created_at)}</p>
+                        </div>
+                        <div>
+                            <p class="text-[11px] font-black uppercase tracking-widest text-gray-400">User</p>
+                            <p class="mt-1 font-semibold text-gray-800">${item.user?.username ?? 'System'}</p>
+                            <p class="text-xs text-gray-400">${item.user?.role ?? 'No role'}</p>
+                        </div>
+                        <div>
+                            <p class="text-[11px] font-black uppercase tracking-widest text-gray-400">Description</p>
+                            <p class="mt-1 break-words text-gray-600">${item.description ?? '-'}</p>
+                        </div>
+                    </div>
+                </div>
             `).join('');
         }
 
@@ -287,6 +327,11 @@
                 <tr>
                     <td colspan="5" class="px-5 py-8 text-center text-sm font-medium text-gray-400">Loading audit logs...</td>
                 </tr>
+            `;
+            logsMobileList.innerHTML = `
+                <div class="rounded-2xl border border-dashed border-gray-200 px-4 py-8 text-center text-sm font-medium text-gray-400">
+                    Loading audit logs...
+                </div>
             `;
 
             const params = new URLSearchParams({

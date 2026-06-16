@@ -15,8 +15,8 @@
     <div class="flex-grow flex min-h-screen flex-col">
 
         <!-- HEADER -->
-        <header class="bg-white py-4 px-8 shadow-sm flex justify-between items-center z-10">
-            <h1 class="text-[#0033ab] text-xl font-bold tracking-tight">EPSON Smart Verification System (SVS)</h1>
+        <header class="bg-white py-4 px-4 md:px-8 shadow-sm flex justify-between items-center z-10">
+            <h1 class="text-[#0033ab] text-base md:text-xl font-bold tracking-tight">EPSON Smart Verification System (SVS)</h1>
             <div class="lg:hidden">
                 <button id="mobileMenuBtn" data-open-mobile-sidebar class="p-2 text-gray-600">
                     <i data-lucide="menu" class="w-6 h-6"></i>
@@ -33,7 +33,7 @@
                     <h2 class="text-2xl font-bold text-gray-800">Vendor Management</h2>
                 </div>
                 <button id="openAddModal"
-                    class="flex items-center gap-2 rounded-xl bg-[#0033ab] px-5 py-3 font-bold text-white shadow-lg shadow-blue-100 transition hover:bg-blue-800 active:scale-95 cursor-pointer">
+                    class="flex w-full sm:w-auto items-center justify-center gap-2 rounded-xl bg-[#0033ab] px-5 py-3 font-bold text-white shadow-lg shadow-blue-100 transition hover:bg-blue-800 active:scale-95 cursor-pointer">
                     <i data-lucide="plus" class="w-5 h-5"></i>
                     Add Vendor
                 </button>
@@ -46,21 +46,27 @@
             <div class="bg-white rounded-3xl shadow-sm border border-blue-50 overflow-hidden">
 
                 <!-- Search Bar -->
-                <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 p-5 border-b border-gray-100">
+                <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 p-4 sm:p-5 border-b border-gray-100">
                     <div class="relative flex-grow">
                         <i data-lucide="search" class="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none"></i>
                         <input id="searchInput" type="text" placeholder="Search vendor name..."
                             class="w-full rounded-xl border border-gray-200 bg-gray-50 py-3 pl-11 pr-4 text-sm font-medium focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#0033ab]">
                     </div>
                     <button id="searchBtn"
-                        class="flex items-center justify-center gap-2 rounded-xl bg-blue-50 px-5 py-3 text-sm font-bold text-[#0033ab] transition hover:bg-blue-100 cursor-pointer">
+                        class="flex w-full sm:w-auto items-center justify-center gap-2 rounded-xl bg-blue-50 px-5 py-3 text-sm font-bold text-[#0033ab] transition hover:bg-blue-100 cursor-pointer">
                         <i data-lucide="filter" class="w-4 h-4"></i>
                         Filter
                     </button>
                 </div>
 
                 <!-- Table -->
-                <div class="overflow-x-auto">
+                <div id="vendorMobileCards" class="space-y-3 p-4 sm:hidden">
+                    <div class="rounded-2xl border border-dashed border-gray-200 px-4 py-8 text-center text-sm font-medium text-gray-400">
+                        Loading vendors...
+                    </div>
+                </div>
+
+                <div class="hidden overflow-x-auto sm:block">
                     <table class="w-full text-sm">
                         <thead class="bg-[#f8faff] text-xs uppercase tracking-widest text-gray-400 font-black">
                             <tr>
@@ -100,9 +106,9 @@
     </div>
 
     <!-- ===== ADD MODAL ===== -->
-    <div id="addModal" class="fixed inset-0 z-50 hidden items-center justify-center bg-slate-950/60 px-4 backdrop-blur-sm">
-        <div class="w-full max-w-md rounded-3xl bg-white p-8 shadow-2xl">
-            <div class="mb-6 flex items-center justify-between">
+    <div id="addModal" class="fixed inset-0 z-50 hidden items-end sm:items-center justify-center bg-slate-950/60 px-3 sm:px-4 py-3 backdrop-blur-sm">
+        <div class="w-full max-w-md max-h-[calc(100vh-1.5rem)] overflow-y-auto rounded-3xl bg-white p-6 sm:p-8 shadow-2xl">
+            <div class="mb-6 flex items-start sm:items-center justify-between gap-3">
                 <h3 class="text-2xl font-black text-gray-800">Add Vendor</h3>
                 <button id="closeAddModal" class="rounded-xl p-2 text-gray-400 hover:bg-gray-100 transition cursor-pointer">
                     <i data-lucide="x" class="w-5 h-5"></i>
@@ -130,9 +136,9 @@
     </div>
 
     <!-- ===== EDIT MODAL ===== -->
-    <div id="editModal" class="fixed inset-0 z-50 hidden items-center justify-center bg-slate-950/60 px-4 backdrop-blur-sm">
-        <div class="w-full max-w-md rounded-3xl bg-white p-8 shadow-2xl">
-            <div class="mb-6 flex items-center justify-between">
+    <div id="editModal" class="fixed inset-0 z-50 hidden items-end sm:items-center justify-center bg-slate-950/60 px-3 sm:px-4 py-3 backdrop-blur-sm">
+        <div class="w-full max-w-md max-h-[calc(100vh-1.5rem)] overflow-y-auto rounded-3xl bg-white p-6 sm:p-8 shadow-2xl">
+            <div class="mb-6 flex items-start sm:items-center justify-between gap-3">
                 <h3 class="text-2xl font-black text-gray-800">Edit Vendor</h3>
                 <button id="closeEditModal" class="rounded-xl p-2 text-gray-400 hover:bg-gray-100 transition cursor-pointer">
                     <i data-lucide="x" class="w-5 h-5"></i>
@@ -161,8 +167,8 @@
     </div>
 
     <!-- ===== DELETE CONFIRM MODAL ===== -->
-    <div id="deleteModal" class="fixed inset-0 z-50 hidden items-center justify-center bg-slate-950/60 px-4 backdrop-blur-sm">
-        <div class="w-full max-w-sm rounded-3xl bg-white p-8 shadow-2xl text-center">
+    <div id="deleteModal" class="fixed inset-0 z-50 hidden items-end sm:items-center justify-center bg-slate-950/60 px-3 sm:px-4 py-3 backdrop-blur-sm">
+        <div class="w-full max-w-sm max-h-[calc(100vh-1.5rem)] overflow-y-auto rounded-3xl bg-white p-6 sm:p-8 shadow-2xl text-center">
             <div class="mx-auto mb-5 flex h-16 w-16 items-center justify-center rounded-full bg-red-50 text-red-500">
                 <i data-lucide="trash-2" class="w-8 h-8"></i>
             </div>
@@ -191,6 +197,7 @@
         const csrfToken    = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
         const alertBanner  = document.getElementById('alertBanner');
         const tableBody    = document.getElementById('vendorTableBody');
+        const vendorMobileCards = document.getElementById('vendorMobileCards');
         const searchInput  = document.getElementById('searchInput');
         const paginationInfo     = document.getElementById('paginationInfo');
         const paginationControls = document.getElementById('paginationControls');
@@ -215,12 +222,16 @@
             const el = document.getElementById(id);
             el.classList.remove('hidden');
             el.classList.add('flex');
+            document.body.classList.add('overflow-hidden');
         }
 
         function close_modal(id) {
             const el = document.getElementById(id);
             el.classList.add('hidden');
             el.classList.remove('flex');
+            if (document.querySelectorAll('.fixed.inset-0.z-50.flex').length === 0) {
+                document.body.classList.remove('overflow-hidden');
+            }
         }
 
         function set_btn_loading(btn, loading, default_text) {
@@ -242,6 +253,10 @@
                         </div>
                     </td>
                 </tr>`;
+            vendorMobileCards.innerHTML = `
+                <div class="rounded-2xl border border-dashed border-gray-200 px-4 py-8 text-center text-sm font-medium text-gray-400">
+                    Loading vendors...
+                </div>`;
             lucide.createIcons();
 
             try {
@@ -295,6 +310,13 @@
                             </div>
                         </td>
                     </tr>`;
+                vendorMobileCards.innerHTML = `
+                    <div class="rounded-2xl border border-dashed border-gray-200 px-4 py-8 text-center text-sm font-medium text-gray-400">
+                        <div class="flex flex-col items-center gap-2">
+                            <i data-lucide="building-2" class="w-8 h-8 text-gray-300"></i>
+                            No vendors found.
+                        </div>
+                    </div>`;
                 lucide.createIcons();
                 paginationInfo.textContent = '';
                 paginationControls.innerHTML = '';
@@ -331,6 +353,31 @@
                     </tr>`;
             }).join('');
 
+            vendorMobileCards.innerHTML = items.map((vendor) => `
+                <div class="rounded-2xl border border-blue-50 bg-[#fbfdff] p-4 shadow-sm">
+                    <div class="flex items-center gap-3">
+                        <div class="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-blue-50 text-[#0033ab]">
+                            <i data-lucide="building-2" class="w-4 h-4"></i>
+                        </div>
+                        <div class="min-w-0">
+                            <p class="truncate font-bold text-gray-800">${escape_html(vendor.vendor_name)}</p>
+                            <p class="text-xs text-gray-400">Vendor ID: ${vendor.vendor_id}</p>
+                        </div>
+                    </div>
+                    <div class="mt-4 grid grid-cols-2 gap-2">
+                        <button
+                            class="edit-btn rounded-xl border border-blue-100 bg-blue-50 px-3 py-2 text-xs font-bold text-[#0033ab] transition hover:bg-blue-100 cursor-pointer"
+                            data-id="${vendor.vendor_id}" data-name="${escape_html(vendor.vendor_name)}">
+                            Edit
+                        </button>
+                        <button
+                            class="delete-btn rounded-xl border border-red-100 bg-red-50 px-3 py-2 text-xs font-bold text-red-500 transition hover:bg-red-100 cursor-pointer"
+                            data-id="${vendor.vendor_id}" data-name="${escape_html(vendor.vendor_name)}">
+                            Delete
+                        </button>
+                    </div>
+                </div>`).join('');
+
             lucide.createIcons();
 
             paginationInfo.textContent = meta.total > 0
@@ -340,10 +387,10 @@
             render_pagination(meta.current_page, meta.last_page);
 
             // Attach row-action listeners
-            tableBody.querySelectorAll('.edit-btn').forEach((btn) => {
+            document.querySelectorAll('.edit-btn').forEach((btn) => {
                 btn.addEventListener('click', () => open_edit_modal(btn.dataset.id, btn.dataset.name));
             });
-            tableBody.querySelectorAll('.delete-btn').forEach((btn) => {
+            document.querySelectorAll('.delete-btn').forEach((btn) => {
                 btn.addEventListener('click', () => open_delete_modal(btn.dataset.id, btn.dataset.name));
             });
         }

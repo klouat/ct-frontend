@@ -16,8 +16,8 @@
     <div class="flex-grow flex min-h-screen flex-col">
         
         <!-- HEADER -->
-        <header class="bg-white py-4 px-8 shadow-sm flex justify-between items-center">
-            <h1 class="text-[#0033ab] text-xl font-bold">EPSON Smart Verification System (SVS)</h1>
+        <header class="bg-white py-4 px-4 md:px-8 shadow-sm flex justify-between items-center">
+            <h1 class="text-[#0033ab] text-base md:text-xl font-bold">EPSON Smart Verification System (SVS)</h1>
             <div class="lg:hidden">
                 <button id="menuBtn" data-open-mobile-sidebar><i data-lucide="menu"></i></button>
             </div>
@@ -27,7 +27,7 @@
             <div id="formSection" class="max-w-2xl mx-auto space-y-6">
                 <h2 class="text-3xl font-bold text-[#001a4d]">New Invoice Entry</h2>
                 
-                <form id="invoiceForm" class="space-y-4 bg-white p-8 rounded-3xl shadow-sm border border-blue-50">
+                <form id="invoiceForm" class="space-y-4 bg-white p-5 md:p-8 rounded-3xl shadow-sm border border-blue-50">
                     <div>
                         <label class="block text-sm font-semibold text-gray-600 mb-2">Pilih Vendor</label>
                         <div class="vendor-select-slot w-full" data-selected-value=""></div>

@@ -66,7 +66,7 @@ Route::post('/invoice-qr/accept/{id}', [InvoiceBarcodeController::class, 'accept
 Route::post('/invoice-qr/reject/{id}', [InvoiceBarcodeController::class, 'reject'])->middleware('frontend.auth:VENDOR');
 
 Route::post('/invoice', [InvoiceController::class, 'store'])->middleware('frontend.auth:ADMIN');
-Route::get('/vendors/options', [VendorController::class, 'index'])->middleware('frontend.auth:ADMIN');
+Route::get('/vendors/options', [VendorController::class, 'index'])->middleware('frontend.auth:ADMIN,SUPERVISOR');
 
 Route::get('/vendors', function () {
     return view('dashboard.vendor');
